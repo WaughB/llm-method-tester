@@ -511,8 +511,8 @@ replication factor, consensus leases, snapshots, and tombstone collection.
 ### Defaults
 
 Every entry is stored with a replication factor of five: the raft-lite
-leader plus four replicas. Writes are acknowledged after a write quorum of
-three replicas have durably applied the entry.
+leader plus four replicas. Writes are acknowledged after a
+write quorum of three replicas have durably applied the entry.
 
 ### Placement
 
@@ -1255,8 +1255,8 @@ _NOTE_REPLICATION_TOPOLOGY = """\
 tags: [aurora-mesh, architecture, replication]
 ---
 Every entry is stored with a replication factor of five — the raft-lite
-leader plus four replicas — and writes are acknowledged after a write
-quorum of three durably apply. Placement spreads replicas across failure
+leader plus four replicas — and writes are acknowledged after a
+write quorum of three durably apply. Placement spreads replicas across failure
 domains reported by [[Glowcast Gossip]].
 
 Snapshots happen every 12000 log entries or 10 minutes and stream in
