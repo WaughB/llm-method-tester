@@ -106,7 +106,8 @@ gold sources present in what the strategy retrieved. Latency = mean seconds per 
 
 Full per-question data (answers, retrieved sources, judge reasoning) is in
 [results/reference-run.json](results/reference-run.json) and explorable in the dashboard's
-drill-down view.
+drill-down view. For production considerations — cost per query, storage, token economics,
+and horizontal-vs-vertical scaling of each strategy — see [docs/scaling.md](docs/scaling.md).
 
 ## Quick start
 
