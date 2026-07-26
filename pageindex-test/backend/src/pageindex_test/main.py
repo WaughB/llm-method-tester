@@ -28,6 +28,7 @@ class AppDeps:
     job_repo: object = None
     conversation_repo: object = None
     trace_repo: object = None
+    eval_repo: object = None
     vector_index_factory: Callable[[str], object] | None = None
     lexical_index: object = None
     query_pipeline: object = None
@@ -38,11 +39,13 @@ def create_app(deps: AppDeps) -> FastAPI:
 
     from pageindex_test.api.chat_router import router as chat_router
     from pageindex_test.api.documents_router import router as documents_router
+    from pageindex_test.api.eval_router import router as eval_router
     from pageindex_test.api.locations_router import router as locations_router
     from pageindex_test.db.repos import (
         ChunkRepo,
         ConversationRepo,
         DocumentRepo,
+        EvalRepo,
         JobRepo,
         SettingsRepo,
         TraceRepo,
@@ -66,6 +69,8 @@ def create_app(deps: AppDeps) -> FastAPI:
         deps.conversation_repo = ConversationRepo(deps.engine)
     if deps.trace_repo is None:
         deps.trace_repo = TraceRepo(deps.engine)
+    if deps.eval_repo is None:
+        deps.eval_repo = EvalRepo(deps.engine)
     if deps.vector_index_factory is None:
         deps.vector_index_factory = lambda location_id: QdrantIndex(
             deps.settings.qdrant_url, location_id
@@ -115,6 +120,7 @@ def create_app(deps: AppDeps) -> FastAPI:
     app.include_router(locations_router)
     app.include_router(documents_router)
     app.include_router(chat_router)
+    app.include_router(eval_router)
 
     @app.get("/api/meta")
     def meta() -> dict:

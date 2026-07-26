@@ -3,6 +3,7 @@ import { NavLink, Navigate, Route, Routes } from "react-router-dom";
 import { api } from "./api/client";
 import Chat from "./pages/Chat";
 import Documents from "./pages/Documents";
+import Eval from "./pages/Eval";
 import Settings from "./pages/Settings";
 
 const NAV = [
@@ -83,7 +84,7 @@ export default function App() {
           <Route path="/" element={<Navigate to="/chat" replace />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/documents" element={<Documents />} />
-          <Route path="/eval" element={<Placeholder title="Eval" />} />
+          <Route path="/eval" element={<Eval />} />
           <Route path="/logs" element={<Placeholder title="Logs" />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>

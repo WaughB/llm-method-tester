@@ -10,6 +10,10 @@ from pageindex_test.db.schema import (
     chunks,
     conversations,
     documents,
+    eval_questions,
+    eval_results,
+    eval_runs,
+    eval_sets,
     jobs,
     messages,
     query_traces,
@@ -237,6 +241,172 @@ class ConversationRepo:
                 .fetchall()
             )
         return [dict(r) for r in rows]
+
+
+class EvalRepo:
+    def __init__(self, engine: Engine) -> None:
+        self._engine = engine
+
+    # sets ------------------------------------------------------------------
+
+    def create_set(self, location_id: str, name: str) -> str:
+        set_id = str(uuid.uuid4())
+        with self._engine.begin() as conn:
+            conn.execute(
+                eval_sets.insert().values(
+                    id=set_id, location_id=location_id, name=name, created_at=utcnow()
+                )
+            )
+        return set_id
+
+    def get_set(self, set_id: str) -> dict | None:
+        with self._engine.connect() as conn:
+            row = (
+                conn.execute(select(eval_sets).where(eval_sets.c.id == set_id))
+                .mappings()
+                .fetchone()
+            )
+        return dict(row) if row else None
+
+    def list_sets(self, location_id: str) -> list[dict]:
+        with self._engine.connect() as conn:
+            rows = (
+                conn.execute(
+                    select(eval_sets)
+                    .where(eval_sets.c.location_id == location_id)
+                    .order_by(eval_sets.c.created_at.desc())
+                )
+                .mappings()
+                .fetchall()
+            )
+        return [dict(r) for r in rows]
+
+    # questions -------------------------------------------------------------
+
+    def add_question(
+        self,
+        set_id: str,
+        question: str,
+        expected_keywords: list[list[str]],
+        gold_doc_ids: list[str],
+        *,
+        source: str = "manual",
+        approved: bool = True,
+    ) -> str:
+        question_id = str(uuid.uuid4())
+        with self._engine.begin() as conn:
+            conn.execute(
+                eval_questions.insert().values(
+                    id=question_id,
+                    set_id=set_id,
+                    question=question,
+                    expected_keywords=expected_keywords,
+                    gold_doc_ids=gold_doc_ids,
+                    source=source,
+                    approved=approved,
+                )
+            )
+        return question_id
+
+    def questions_for(self, set_id: str) -> list[dict]:
+        with self._engine.connect() as conn:
+            rows = (
+                conn.execute(select(eval_questions).where(eval_questions.c.set_id == set_id))
+                .mappings()
+                .fetchall()
+            )
+        return [dict(r) for r in rows]
+
+    def set_approved(self, question_id: str, approved: bool) -> None:
+        with self._engine.begin() as conn:
+            conn.execute(
+                eval_questions.update()
+                .where(eval_questions.c.id == question_id)
+                .values(approved=approved)
+            )
+
+    def delete_question(self, question_id: str) -> None:
+        with self._engine.begin() as conn:
+            conn.execute(delete(eval_questions).where(eval_questions.c.id == question_id))
+
+    # runs ------------------------------------------------------------------
+
+    def create_run(self, set_id: str, model: str, pipeline: str) -> str:
+        run_id = str(uuid.uuid4())
+        with self._engine.begin() as conn:
+            conn.execute(
+                eval_runs.insert().values(
+                    id=run_id, set_id=set_id, model=model, pipeline=pipeline, status="queued"
+                )
+            )
+        return run_id
+
+    def get_run(self, run_id: str) -> dict | None:
+        with self._engine.connect() as conn:
+            row = (
+                conn.execute(select(eval_runs).where(eval_runs.c.id == run_id))
+                .mappings()
+                .fetchone()
+            )
+        return dict(row) if row else None
+
+    def runs_for_set(self, set_id: str) -> list[dict]:
+        with self._engine.connect() as conn:
+            rows = (
+                conn.execute(select(eval_runs).where(eval_runs.c.set_id == set_id))
+                .mappings()
+                .fetchall()
+            )
+        return [dict(r) for r in rows]
+
+    def start_run(self, run_id: str) -> None:
+        with self._engine.begin() as conn:
+            conn.execute(
+                eval_runs.update()
+                .where(eval_runs.c.id == run_id)
+                .values(status="running", started_at=utcnow())
+            )
+
+    def finish_run(self, run_id: str, summary: dict, *, error: str | None = None) -> None:
+        with self._engine.begin() as conn:
+            conn.execute(
+                eval_runs.update()
+                .where(eval_runs.c.id == run_id)
+                .values(
+                    status="error" if error else "done",
+                    finished_at=utcnow(),
+                    summary=dict(summary, error=error) if error else summary,
+                )
+            )
+
+    def save_result(self, run_id: str, **values) -> None:
+        with self._engine.begin() as conn:
+            conn.execute(eval_results.insert().values(run_id=run_id, **values))
+
+    def results_for_run(self, run_id: str) -> list[dict]:
+        with self._engine.connect() as conn:
+            rows = (
+                conn.execute(select(eval_results).where(eval_results.c.run_id == run_id))
+                .mappings()
+                .fetchall()
+            )
+        return [dict(r) for r in rows]
+
+    def summarize_run(self, run_id: str) -> dict:
+        results = self.results_for_run(run_id)
+        if not results:
+            return {"count": 0}
+
+        def avg(key: str) -> float | None:
+            values = [r[key] for r in results if r[key] is not None]
+            return round(sum(values) / len(values), 3) if values else None
+
+        return {
+            "count": len(results),
+            "avg_keyword_recall": avg("keyword_recall"),
+            "avg_retrieval_hit": avg("retrieval_hit"),
+            "avg_judge_score": avg("judge_score"),
+        }
 
 
 class TraceRepo:
