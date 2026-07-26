@@ -1,0 +1,29 @@
+[
+  {
+    "id": "q001",
+    "question": "What is the default port for Widget?",
+    "category": "single_hop",
+    "expected_keywords": [["7777"]],
+    "source_docs": ["docs/overview.md"],
+    "source_notes": ["vault/Concepts/Widget Overview.md"],
+    "gold_answer": "The default port is 7777."
+  },
+  {
+    "id": "q002",
+    "question": "What is the API rate limit and where is it enforced?",
+    "category": "multi_hop",
+    "expected_keywords": [["10 requests", "10 per minute"], ["gizmo", "/gizmo"]],
+    "source_docs": ["docs/api.md"],
+    "source_notes": ["vault/Reference/Rate Limits.md", "vault/Concepts/Gizmo.md"],
+    "gold_answer": "The rate limit is 10 requests per minute, enforced on the /gizmo endpoint."
+  },
+  {
+    "id": "q003",
+    "question": "How long is restart downtime?",
+    "category": "single_hop",
+    "expected_keywords": [["2 seconds", "under 2"]],
+    "source_docs": ["docs/ops.md"],
+    "source_notes": ["vault/Runbooks/Restart.md"],
+    "gold_answer": "Restart downtime is under 2 seconds."
+  }
+]
