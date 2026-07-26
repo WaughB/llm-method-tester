@@ -81,20 +81,14 @@ class PageIndexOfficialStrategy(RetrievalStrategy):
         else:
             self._trees = self._build_trees(corpus, model)
             cache_file.parent.mkdir(parents=True, exist_ok=True)
-            cache_file.write_text(
-                json.dumps(self._trees, ensure_ascii=False), encoding="utf-8"
-            )
+            cache_file.write_text(json.dumps(self._trees, ensure_ascii=False), encoding="utf-8")
         self._node_map = self._renumber_nodes(self._trees)
 
     def _cache_file(self, corpus: BenchmarkCorpus, model: str) -> Path:
         import re
 
         safe_model = re.sub(r"[^A-Za-z0-9._-]", "-", model)
-        return (
-            self._cache_dir
-            / "pageindex_official"
-            / f"{safe_model}_{corpus.content_hash()}.json"
-        )
+        return self._cache_dir / "pageindex_official" / f"{safe_model}_{corpus.content_hash()}.json"
 
     def _build_trees(self, corpus: BenchmarkCorpus, model: str) -> list[dict]:
         """Run their md_to_tree verbatim on every corpus document."""

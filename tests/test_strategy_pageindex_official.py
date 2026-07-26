@@ -161,9 +161,7 @@ class TestAnswer:
     ) -> None:
         import litellm
 
-        scripted = ScriptedLiteLLM(
-            [json.dumps({"node_list": ["9999"]}), "best-effort answer"]
-        )
+        scripted = ScriptedLiteLLM([json.dumps({"node_list": ["9999"]}), "best-effort answer"])
         monkeypatch.setattr(litellm, "completion", scripted.completion)
         strategy = PageIndexOfficialStrategy(cache_dir=tmp_path)
         strategy.prepare(mini_corpus, "m1")
