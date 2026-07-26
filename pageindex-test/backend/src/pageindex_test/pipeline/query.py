@@ -115,14 +115,27 @@ class QueryPipeline:
                 stage.detail = {"chunk_ids": [hit.chunk_id for hit in fused][:20]}
 
             citations: list[Citation]
+            context = ""
             if pipeline_name == "staged":
-                tree_result = self._tree_stage.run(recorder, location_id, question, model, fused)
-                context = tree_result.context
-                citations = tree_result.citations
-                prompt_tokens += tree_result.prompt_tokens
-                completion_tokens += tree_result.completion_tokens
-                llm_calls += tree_result.llm_calls
-            else:
+                from pageindex_test.retrieval.trees import TreeStageOverBudget
+
+                try:
+                    tree_result = self._tree_stage.run(
+                        recorder, location_id, question, model, fused
+                    )
+                    context = tree_result.context
+                    citations = tree_result.citations
+                    prompt_tokens += tree_result.prompt_tokens
+                    completion_tokens += tree_result.completion_tokens
+                    llm_calls += tree_result.llm_calls
+                except TreeStageOverBudget as exc:
+                    # NEVER silently truncate: fall back to hybrid context and
+                    # record why, visibly, in the trace
+                    logger.warning("tree stage fallback", extra={"data": {"reason": str(exc)}})
+                    with recorder.stage("tree_fallback") as stage:
+                        stage.detail = {"reason": str(exc)}
+                    pipeline_name = "hybrid_only"
+            if pipeline_name == "hybrid_only":
                 chunk_rows = self._chunks.get_many([hit.chunk_id for hit in fused])
                 context = "\n\n---\n\n".join(
                     f"[{row['heading_path'] or row['doc_id']}]\n{row['text']}" for row in chunk_rows

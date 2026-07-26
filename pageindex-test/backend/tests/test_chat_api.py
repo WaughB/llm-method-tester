@@ -120,6 +120,96 @@ class TestChatFlow:
         assert "Backups run nightly" in prompt
         assert "When do backups run?" in prompt
 
+    def test_staged_pipeline_runs_tree_stages(self, engine: Engine, tmp_path: Path) -> None:
+        import json as jsonlib
+
+        from pageindex_test.retrieval.trees import TreeStage
+
+        root = tmp_path / "root"
+        root.mkdir()
+        settings = Settings(_env_file=None, mount_roots_raw=f"{root}=C:\\data")
+        embedder = FakeEmbeddingClient()
+        vector_index = InMemoryVectorIndex()
+        lexical = Bm25Index()
+        llm = FakeLLMClient(
+            responses={
+                "navigating tables of contents": jsonlib.dumps({"node_ids": ["n0002"]}),
+            },
+            default="Restart with restart-now.",
+        )
+        library = root / ".pageindex-test"
+        tree_stage = TreeStage(
+            llm=llm,
+            tree_cache_dir_resolver=lambda loc: library / "trees",
+            extracted_path_resolver=lambda loc, doc_id: library / "docs" / doc_id / "extracted.md",
+            doc_title_resolver=lambda doc_id: "Ops",
+        )
+        pipeline = QueryPipeline(
+            engine=engine,
+            chunks=ChunkRepo(engine),
+            lexical=lexical,
+            embedder=embedder,
+            vector_index_factory=lambda location_id: vector_index,
+            llm=llm,
+            hybrid_top_n=4,
+            tree_stage=tree_stage,
+        )
+        deps = AppDeps(
+            settings=settings,
+            engine=engine,
+            vector_index_factory=lambda location_id: vector_index,
+            lexical_index=lexical,
+            query_pipeline=pipeline,
+        )
+        client = TestClient(create_app(deps))
+        client.fake_llm = llm  # type: ignore[attr-defined]
+        client.embedder = embedder  # type: ignore[attr-defined]
+        client.vector_index = vector_index  # type: ignore[attr-defined]
+        doc_id = seed_chunks(client, engine)
+        doc_dir = library / "docs" / doc_id
+        doc_dir.mkdir(parents=True)
+        (doc_dir / "extracted.md").write_text(
+            "# Ops\n\n## Restarting\n\nUse restart-now.\n\n## Other\n\nnothing",
+            encoding="utf-8",
+        )
+
+        conversation = client.post("/api/conversations", json={}).json()
+        payload = client.post(
+            f"/api/conversations/{conversation['id']}/messages",
+            json={"question": "How do I restart?", "use_pageindex_stage": True},
+        ).json()
+        assert payload["pipeline"] == "staged"
+        stage_names = [s["name"] for s in payload["stages"]]
+        assert stage_names == ["bm25", "vector", "fusion", "tree_build", "tree_select", "answer"]
+        assert payload["citations"][0]["heading"] == "Restarting"
+        trace = client.get(f"/api/traces/{payload['trace_id']}").json()
+        assert trace["pipeline"] == "staged"
+        assert trace["llm_calls"] == 2  # tree select + answer
+
+    def test_staged_falls_back_visibly_when_no_trees(
+        self, app_client: TestClient, engine: Engine
+    ) -> None:
+        # app_client's pipeline has no tree_stage -> pipeline reports hybrid_only;
+        # here we exercise the explicit fallback path with a stage that raises
+        from pageindex_test.retrieval.trees import TreeStageOverBudget
+
+        class ExplodingTreeStage:
+            def run(self, *args, **kwargs):
+                raise TreeStageOverBudget("no trees for these docs")
+
+        seed_chunks(app_client, engine)
+        deps = app_client.app.state.deps  # type: ignore[attr-defined]
+        deps.query_pipeline._tree_stage = ExplodingTreeStage()
+        conversation = app_client.post("/api/conversations", json={}).json()
+        payload = app_client.post(
+            f"/api/conversations/{conversation['id']}/messages",
+            json={"question": "Which port?", "use_pageindex_stage": True},
+        ).json()
+        assert payload["pipeline"] == "hybrid_only"
+        stage_names = [s["name"] for s in payload["stages"]]
+        assert "tree_fallback" in stage_names
+        assert "7433" in payload["answer"]
+
     def test_unknown_conversation_404(self, app_client: TestClient) -> None:
         response = app_client.post("/api/conversations/zzz/messages", json={"question": "q"})
         assert response.status_code == 404

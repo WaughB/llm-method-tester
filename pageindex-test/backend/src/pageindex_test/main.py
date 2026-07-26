@@ -73,7 +73,30 @@ def create_app(deps: AppDeps) -> FastAPI:
     if deps.lexical_index is None:
         deps.lexical_index = Bm25Index()
     if deps.query_pipeline is None:
+        from pageindex_test.locations import library_dir
+        from pageindex_test.retrieval.trees import TreeStage
+
         settings = deps.settings
+        llm = OllamaClient(settings.ollama_base_url, timeout_s=settings.request_timeout_s)
+
+        def _location(location_id: str):
+            for loc in deps.location_service.list():
+                if loc.location_id == location_id:
+                    return loc
+            raise KeyError(f"Unknown location {location_id}")
+
+        tree_stage = TreeStage(
+            llm=llm,
+            tree_cache_dir_resolver=lambda loc_id: library_dir(_location(loc_id)) / "trees",
+            extracted_path_resolver=lambda loc_id, doc_id: (
+                library_dir(_location(loc_id)) / "docs" / doc_id / "extracted.md"
+            ),
+            doc_title_resolver=lambda doc_id: (
+                (deps.document_repo.get(doc_id) or {}).get("title") or "Document"
+            ),
+            max_docs=settings.tree_stage_docs,
+            num_ctx=settings.tree_num_ctx,
+        )
         deps.query_pipeline = QueryPipeline(
             engine=deps.engine,
             chunks=deps.chunk_repo,
@@ -82,8 +105,9 @@ def create_app(deps: AppDeps) -> FastAPI:
                 settings.ollama_base_url, model=settings.embedding_model
             ),
             vector_index_factory=deps.vector_index_factory,
-            llm=OllamaClient(settings.ollama_base_url, timeout_s=settings.request_timeout_s),
+            llm=llm,
             hybrid_top_n=settings.hybrid_top_n,
+            tree_stage=tree_stage,
         )
 
     app = FastAPI(title="pageindex-test", version=__version__)
