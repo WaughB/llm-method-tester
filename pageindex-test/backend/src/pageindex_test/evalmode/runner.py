@@ -26,9 +26,7 @@ class EvalRunner:
         if run is None:
             raise KeyError(f"No eval run {run_id}")
         self._repo.start_run(run_id)
-        questions = [
-            q for q in self._repo.questions_for(run["set_id"]) if q["approved"]
-        ]
+        questions = [q for q in self._repo.questions_for(run["set_id"]) if q["approved"]]
         location_id = self._repo.get_set(run["set_id"])["location_id"]
         use_stage = run["pipeline"] == "staged"
 

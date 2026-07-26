@@ -25,7 +25,8 @@ acceptable phrasings of one fact that a correct answer must contain \
 (short, distinctive strings that literally appear in the excerpts).
 
 Respond with ONLY this JSON:
-{{"questions": [{{"question": "...", "expected_keywords": [["phrase", "alt-phrase"], ...]}}, ...]}}"""
+{{"questions": [{{"question": "...",
+  "expected_keywords": [["phrase", "alt-phrase"], ...]}}, ...]}}"""
 
 
 def generate_questions(
@@ -53,11 +54,7 @@ def generate_questions(
             if isinstance(group, list) and group
         ]
         # keep only keyword groups whose aliases actually appear in the source
-        groups = [
-            group
-            for group in groups
-            if any(alias.lower() in haystack for alias in group)
-        ]
+        groups = [group for group in groups if any(alias.lower() in haystack for alias in group)]
         if question and groups:
             questions.append(
                 {"question": question, "expected_keywords": groups, "gold_doc_ids": [doc_id]}

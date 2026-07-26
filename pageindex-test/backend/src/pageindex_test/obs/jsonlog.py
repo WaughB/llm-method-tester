@@ -104,5 +104,19 @@ def configure_logging(engine: Engine | None = None, level: int = logging.INFO) -
     root.addHandler(stdout_handler)
     if engine is not None:
         root.addHandler(DatabaseLogHandler(engine))
-    # keep uvicorn's access noise out of the metrics-bearing log table
+    # keep transport noise out of the metrics-bearing log table
     logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("httpcore").setLevel(logging.WARNING)
+
+
+def prune_old_logs(engine: Engine, retention_days: int) -> int:
+    """Delete log rows older than the retention window; returns count removed."""
+    from datetime import timedelta
+
+    from sqlalchemy import delete
+
+    cutoff = (datetime.now(UTC) - timedelta(days=retention_days)).isoformat()
+    with engine.begin() as conn:
+        result = conn.execute(delete(logs_table).where(logs_table.c.ts < cutoff))
+    return int(result.rowcount or 0)

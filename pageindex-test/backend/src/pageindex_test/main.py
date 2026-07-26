@@ -117,10 +117,13 @@ def create_app(deps: AppDeps) -> FastAPI:
 
     app = FastAPI(title="pageindex-test", version=__version__)
     app.state.deps = deps
+    from pageindex_test.api.logs_router import router as logs_router
+
     app.include_router(locations_router)
     app.include_router(documents_router)
     app.include_router(chat_router)
     app.include_router(eval_router)
+    app.include_router(logs_router)
 
     @app.get("/api/meta")
     def meta() -> dict:
@@ -143,13 +146,17 @@ def build_deps(settings: Settings | None = None) -> AppDeps:
     """Production composition root."""
     from pageindex_test.db.schema import init_schema, make_engine
     from pageindex_test.health import check_database, check_ollama_models, check_qdrant
-    from pageindex_test.obs.jsonlog import configure_logging
+    from pageindex_test.obs.jsonlog import configure_logging, prune_old_logs
 
     settings = settings or Settings()
     engine = make_engine(settings.database_url)
     init_schema(engine)
     configure_logging(engine)
-    logger.info("schema initialized", extra={"data": {"db": settings.database_url.split("@")[-1]}})
+    pruned = prune_old_logs(engine, settings.log_retention_days)
+    logger.info(
+        "schema initialized",
+        extra={"data": {"db": settings.database_url.split("@")[-1], "logs_pruned": pruned}},
+    )
     frontend_dist = settings.frontend_dist or Path("frontend") / "dist"
     return AppDeps(
         settings=settings,

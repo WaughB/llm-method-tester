@@ -59,8 +59,7 @@ class FakeQueryPipeline:
                 return QueryResult(
                     answer=answer,
                     citations=[
-                        Citation(doc_id=d, chunk_id=None, heading="H", snippet="s")
-                        for d in doc_ids
+                        Citation(doc_id=d, chunk_id=None, heading="H", snippet="s") for d in doc_ids
                     ],
                     trace_id=f"trace-{len(self.calls)}",
                     pipeline="staged" if use_pageindex_stage else "hybrid_only",

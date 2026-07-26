@@ -109,6 +109,11 @@ Full per-question data (answers, retrieved sources, judge reasoning) is in
 drill-down view. For production considerations — cost per query, storage, token economics,
 and horizontal-vs-vertical scaling of each strategy — see [docs/scaling.md](docs/scaling.md).
 
+> **Want to test this on your own documents?** See
+> [pageindex-test/](pageindex-test/README.md) — a production-shaped prototype of the staged
+> pipeline (hybrid recall → PageIndex precision) with chat, eval mode, storage-location
+> selection, and full pipeline tracing, all in one docker-compose stack.
+
 ## Quick start
 
 Prerequisites: [uv](https://docs.astral.sh/uv/), Node 18.18+, [Ollama](https://ollama.com) ≥ 0.32.

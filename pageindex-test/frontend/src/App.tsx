@@ -4,6 +4,7 @@ import { api } from "./api/client";
 import Chat from "./pages/Chat";
 import Documents from "./pages/Documents";
 import Eval from "./pages/Eval";
+import Logs from "./pages/Logs";
 import Settings from "./pages/Settings";
 
 const NAV = [
@@ -13,16 +14,6 @@ const NAV = [
   { to: "/logs", label: "Logs", index: "04" },
   { to: "/settings", label: "Settings", index: "05" },
 ];
-
-function Placeholder({ title }: { title: string }) {
-  return (
-    <div>
-      <div className="section-tag mb-1">coming online</div>
-      <h2 className="text-xl font-semibold">{title}</h2>
-      <p className="text-sub text-sm mt-4">This module arrives in a later phase.</p>
-    </div>
-  );
-}
 
 export function HealthFooter() {
   const meta = useQuery({ queryKey: ["meta"], queryFn: api.meta, refetchInterval: 15000 });
@@ -85,7 +76,7 @@ export default function App() {
           <Route path="/chat" element={<Chat />} />
           <Route path="/documents" element={<Documents />} />
           <Route path="/eval" element={<Eval />} />
-          <Route path="/logs" element={<Placeholder title="Logs" />} />
+          <Route path="/logs" element={<Logs />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>
       </main>

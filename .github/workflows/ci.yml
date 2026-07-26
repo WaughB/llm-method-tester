@@ -72,3 +72,55 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build image
         run: docker build -t llm-method-tester .
+
+  pageindex-test-backend:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: pageindex-test/backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Install dependencies
+        run: uv sync --frozen
+      - name: Lint
+        run: uv run ruff check .
+      - name: Format check
+        run: uv run ruff format --check .
+      - name: Tests (coverage gate 80%)
+        run: uv run pytest
+
+  pageindex-test-frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: pageindex-test/frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: pageindex-test/frontend/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Type check
+        run: npm run typecheck
+      - name: Tests (coverage gate 80%)
+        run: npm run test:coverage
+      - name: Build
+        run: npm run build
+
+  pageindex-test-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image (repo-root context for the path dependency)
+        run: docker build -f pageindex-test/Dockerfile -t pageindex-test .

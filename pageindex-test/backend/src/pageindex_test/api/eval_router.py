@@ -124,9 +124,7 @@ def start_runs(request: Request, set_id: str, body: RunRequest) -> dict:
     queued = []
     for pipeline in body.pipelines:
         run_id = deps.eval_repo.create_run(set_id, model, pipeline)
-        job_id = deps.job_repo.enqueue(
-            location.location_id, "eval_run", {"run_id": run_id}
-        )
+        job_id = deps.job_repo.enqueue(location.location_id, "eval_run", {"run_id": run_id})
         queued.append({"run_id": run_id, "pipeline": pipeline, "job_id": job_id})
     logger.info("eval runs queued", extra={"data": {"set_id": set_id, "runs": len(queued)}})
     return {"runs": queued}
