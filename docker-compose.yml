@@ -5,6 +5,9 @@ services:
     # host reboot (as soon as the Docker daemon starts), but stay down if you
     # deliberately `docker compose stop` them.
     restart: unless-stopped
+    environment:
+      # PageIndex tree outlines exceed Ollama's default context window
+      OLLAMA_CONTEXT_LENGTH: "16384"
     volumes:
       - ollama-models:/root/.ollama
       # Already have models pulled on the host? Bind-mount them instead of

@@ -46,6 +46,7 @@ class TestWiring:
             "traditional_rag",
             "obsidian_rag",
             "pageindex",
+            "pageindex_official",
         ]
         repo.close()
 

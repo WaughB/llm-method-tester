@@ -10,7 +10,7 @@ describe("NewRun", () => {
   it("lists models and strategies from /api/meta", async () => {
     renderWithProviders(<NewRun />);
     expect(await screen.findByText("gpt-oss:20b")).toBeInTheDocument();
-    expect(screen.getByText("PageIndex")).toBeInTheDocument();
+    expect(screen.getByText("PageIndex (reimpl)")).toBeInTheDocument();
     expect(screen.getByText("Baseline")).toBeInTheDocument();
   });
 

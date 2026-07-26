@@ -16,6 +16,11 @@ dependencies = [
     "rank-bm25>=0.2.2",
     "typer>=0.15",
     "pyyaml>=6.0.3",
+    # required by the vendored official PageIndex implementation
+    "litellm>=1.84.0",
+    "pypdf2>=3.0.1",
+    "pymupdf>=1.26",
+    "python-dotenv>=1.2",
 ]
 
 [dependency-groups]
@@ -39,6 +44,7 @@ packages = ["src/llm_bench"]
 line-length = 100
 target-version = "py312"
 src = ["src", "tests"]
+extend-exclude = ["src/llm_bench/_vendor"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "W"]
@@ -54,6 +60,7 @@ markers = ["live: tests that require a running Ollama server (excluded by defaul
 
 [tool.coverage.run]
 source = ["src/llm_bench"]
+omit = ["src/llm_bench/_vendor/*"]
 
 [tool.coverage.report]
 exclude_lines = [

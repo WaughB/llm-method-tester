@@ -17,6 +17,7 @@ from llm_bench.storage.repository import ResultsRepository
 from llm_bench.strategies.baseline import BaselineStrategy
 from llm_bench.strategies.obsidian_rag import ObsidianRAGStrategy
 from llm_bench.strategies.pageindex import PageIndexStrategy
+from llm_bench.strategies.pageindex_official import PageIndexOfficialStrategy
 from llm_bench.strategies.traditional_rag import TraditionalRAGStrategy
 
 
@@ -46,6 +47,9 @@ def build_runner(
         TraditionalRAGStrategy(llm=llm, embedder=embedder, chroma_client=chroma),
         ObsidianRAGStrategy(llm=llm),
         PageIndexStrategy(llm=llm, cache_dir=settings.cache_dir),
+        PageIndexOfficialStrategy(
+            cache_dir=settings.cache_dir, ollama_base_url=settings.ollama_base_url
+        ),
     ]
     judge = LLMJudge(client=llm, model=settings.judge_model)
     return BenchmarkRunner(

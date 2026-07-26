@@ -37,11 +37,22 @@ attributable to retrieval, not memorization.
    title/tags/body picks seed notes, then the strategy walks wikilinks **and backlinks** one hop
    out (score decay 0.5, shared-tag boost) — mimicking how a human hops through their vault.
    Retrieval is fully deterministic; the LLM only generates.
-4. **PageIndex** — a faithful reimplementation of the vectorless, reasoning-based retrieval
-   method from [VectifyAI/PageIndex](https://github.com/VectifyAI/PageIndex) (MIT): documents
-   become TOC-like heading trees with LLM-written node summaries; at question time the model
-   *reasons* over the tree outline to select sections, then descends one level to refine.
-   Costs 2–3 LLM calls per question — and that cost is part of what the benchmark measures.
+4. **PageIndex (reimpl)** — a faithful reimplementation of the vectorless, reasoning-based
+   retrieval method from [VectifyAI/PageIndex](https://github.com/VectifyAI/PageIndex) (MIT):
+   documents become TOC-like heading trees with LLM-written node summaries; at question time
+   the model *reasons* over the tree outline to select sections, then descends one level to
+   refine. Costs 2–3 LLM calls per question — and that cost is part of what the benchmark
+   measures.
+5. **PageIndex (official)** — the authors' **actual code**, vendored verbatim at commit
+   [`190f8b3`](https://github.com/VectifyAI/PageIndex/tree/190f8b378be58199ca993566a9214dba72089c54)
+   into [src/llm_bench/_vendor/pageindex](src/llm_bench/_vendor/pageindex): their `md_to_tree`
+   builds the indexes and their published cookbook retrieval flow
+   (`pageindex_RAG_simple.ipynb` — their search prompt, their JSON parsing, their answer
+   prompt) answers questions, all through LiteLLM→Ollama as their code supports. Two disclosed
+   adaptations for a multi-document benchmark: node ids are renumbered to stay unique across
+   documents (same 4-digit format), and the search prompt receives a JSON list of per-document
+   trees instead of a single tree. Having both variants means the reimplementation is
+   *validated against* the official code on identical inputs.
 
 ## Results
 
@@ -258,7 +269,9 @@ All settings are env-overridable with the `LLM_BENCH_` prefix (or a `.env` file)
 ## Acknowledgements
 
 - **[PageIndex](https://github.com/VectifyAI/PageIndex)** by VectifyAI (MIT) — the vectorless
-  reasoning-retrieval method reimplemented here as the `pageindex` strategy.
+  reasoning-retrieval method. Their code is vendored verbatim as the `pageindex_official`
+  strategy (see [PROVENANCE](src/llm_bench/_vendor/pageindex/PROVENANCE.md)) and independently
+  reimplemented as the `pageindex` strategy.
 - **[Ollama](https://ollama.com)** for making local models this easy.
 - gpt-oss (OpenAI), Nemotron (NVIDIA), and Llama (Meta) — the open-weight models under test.
 

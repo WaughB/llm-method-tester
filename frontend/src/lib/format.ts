@@ -25,7 +25,8 @@ export const STRATEGY_LABELS: Record<string, string> = {
   baseline: "Baseline",
   traditional_rag: "Vector RAG",
   obsidian_rag: "Obsidian RAG",
-  pageindex: "PageIndex",
+  pageindex: "PageIndex (reimpl)",
+  pageindex_official: "PageIndex (official)",
 };
 
 export function strategyLabel(name: string): string {
