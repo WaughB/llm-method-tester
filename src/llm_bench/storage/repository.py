@@ -106,9 +106,9 @@ class ResultsRepository:
 
     # -- results ------------------------------------------------------------
 
-    def save_result(self, result: ResultRecord) -> None:
+    def save_result(self, result: ResultRecord) -> int:
         with self._lock, self._conn:
-            self._conn.execute(
+            cursor = self._conn.execute(
                 """INSERT INTO results (
                     run_id, model, strategy, question_id, category, answer,
                     retrieved_ids_json, latency_ms, tokens_per_sec, llm_calls,
@@ -137,6 +137,25 @@ class ResultsRepository:
                     result.error,
                 ),
             )
+        return int(cursor.lastrowid)  # type: ignore[arg-type]
+
+    def unjudged_results(self, run_id: int) -> list[ResultRecord]:
+        """Successful rows still awaiting a judge verdict (deferred judge pass)."""
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT * FROM results WHERE run_id = ? AND error IS NULL "
+                "AND judge_verdict IS NULL ORDER BY id",
+                (run_id,),
+            ).fetchall()
+        return [self._result_from_row(r) for r in rows]
+
+    def set_judgment(self, result_id: int, score: int, verdict: str, reasoning: str) -> None:
+        with self._lock, self._conn:
+            self._conn.execute(
+                "UPDATE results SET judge_score = ?, judge_verdict = ?, judge_reasoning = ? "
+                "WHERE id = ?",
+                (score, verdict, reasoning, result_id),
+            )
 
     def results_for_run(self, run_id: int) -> list[ResultRecord]:
         with self._lock:
@@ -156,6 +175,7 @@ class ResultsRepository:
     @staticmethod
     def _result_from_row(row: sqlite3.Row) -> ResultRecord:
         return ResultRecord(
+            id=row["id"],
             run_id=row["run_id"],
             model=row["model"],
             strategy=row["strategy"],

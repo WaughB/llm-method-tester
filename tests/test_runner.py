@@ -139,8 +139,29 @@ class TestBenchmarkRunner:
         events: list[RunProgress] = []
         runner = make_runner(repo, mini_corpus, dataset, [StubStrategy()])
         runner.run(models=["m1"], progress=events.append)
-        assert events[-1].done == events[-1].total == 3
-        assert all(e.total == 3 for e in events)
+        # 3 matrix cells + 3 judge-pass steps
+        assert events[-1].done == events[-1].total == 6
+        assert any("judging" in e.current for e in events)
+
+    def test_judging_is_deferred_until_after_all_answers(
+        self, repo: ResultsRepository, mini_corpus: BenchmarkCorpus, dataset: QADataset
+    ) -> None:
+        judge_client = FakeLLMClient(
+            default=json.dumps({"score": 2, "verdict": "partial", "reasoning": "r"})
+        )
+        evaluator = Evaluator(judge=LLMJudge(client=judge_client, model="judge"))
+        runner = BenchmarkRunner(
+            repo=repo,
+            corpus=mini_corpus,
+            dataset=dataset,
+            strategies=[StubStrategy()],
+            evaluator=evaluator,
+        )
+        run_id = runner.run(models=["m1", "m2"])
+        # exactly one judge call per successful cell, all rows updated
+        assert len(judge_client.calls) == 6
+        assert all(r.judge_score == 2 for r in repo.results_for_run(run_id))
+        assert repo.unjudged_results(run_id) == []
 
     def test_strategy_filter(
         self, repo: ResultsRepository, mini_corpus: BenchmarkCorpus, dataset: QADataset

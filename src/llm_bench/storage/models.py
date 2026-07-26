@@ -13,6 +13,7 @@ class RunRecord(BaseModel):
 
 
 class ResultRecord(BaseModel):
+    id: int | None = None  # assigned by storage
     run_id: int
     model: str
     strategy: str

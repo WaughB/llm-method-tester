@@ -89,11 +89,38 @@ class BenchmarkRunner:
                                     current=f"{model} / {strategy.name} / {question.id}",
                                 )
                             )
+            self._judge_pass(run_id, matrix_total=total, progress=progress)
             self._repo.finish_run(run_id, "completed")
         except BaseException as exc:
             self._repo.finish_run(run_id, "failed", error=str(exc))
             raise
         return run_id
+
+    def _judge_pass(
+        self, run_id: int, matrix_total: int, progress: ProgressCallback | None
+    ) -> None:
+        """Judge all unjudged rows after the matrix, so the judge model loads once.
+
+        Judging inline would force Ollama to swap between the model under test
+        and the judge model on every single question.
+        """
+        pending = self._evaluator.judgeable(self._repo.unjudged_results(run_id))
+        total = matrix_total + len(pending)
+        for i, result in enumerate(pending, start=1):
+            question = self._dataset.get(result.question_id)
+            judge_result = self._evaluator.judge_answer(question, result.answer)
+            if judge_result is not None and result.id is not None:
+                self._repo.set_judgment(
+                    result.id, judge_result.score, judge_result.verdict, judge_result.reasoning
+                )
+            if progress is not None:
+                progress(
+                    RunProgress(
+                        total=total,
+                        done=matrix_total + i,
+                        current=f"judging / {result.model} / {result.strategy} / {result.question_id}",
+                    )
+                )
 
     def _select_strategies(self, names: list[str] | None) -> list[RetrievalStrategy]:
         if names is None:
@@ -134,7 +161,7 @@ class BenchmarkRunner:
         except Exception as exc:  # noqa: BLE001 - one bad cell must not kill the run
             self._repo.save_result(self._error_record(run_id, model, strategy, question, str(exc)))
             return
-        outcome = self._evaluator.evaluate(
+        outcome = self._evaluator.evaluate_metrics(
             question, answer.text, answer.retrieved_ids, strategy.representation
         )
         self._repo.save_result(
@@ -154,9 +181,9 @@ class BenchmarkRunner:
                 context_chars=answer.context_chars,
                 keyword_recall=outcome.keyword_recall,
                 retrieval_hit_rate=outcome.retrieval_hit_rate,
-                judge_score=outcome.judge.score if outcome.judge else None,
-                judge_verdict=outcome.judge.verdict if outcome.judge else None,
-                judge_reasoning=outcome.judge.reasoning if outcome.judge else None,
+                judge_score=None,  # filled by the deferred judge pass
+                judge_verdict=None,
+                judge_reasoning=None,
                 error=None,
             )
         )
