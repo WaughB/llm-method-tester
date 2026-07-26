@@ -32,12 +32,16 @@ def parse_mount_roots(raw: str) -> list[MountRoot]:
         container, sep, host = entry.partition("=")
         if not container.strip():
             continue
+        if sep and not host.strip():
+            continue  # "path=" means an unset optional root (compose ${VAR:-})
         roots.append(MountRoot(container.strip(), host.strip() if sep else ""))
     return roots
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_prefix="PIT_", env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_prefix="PIT_", env_file=".env", extra="ignore", populate_by_name=True
+    )
 
     database_url: str = "postgresql+psycopg://pageindex:pageindex@localhost:5433/pageindex"
     qdrant_url: str = "http://localhost:6333"
@@ -49,7 +53,7 @@ class Settings(BaseSettings):
     judge_model: str = "gpt-oss:20b"
     tree_num_ctx: int = 16384
 
-    mount_roots_raw: str = Field(default="", alias="PIT_MOUNT_ROOTS")
+    mount_roots_raw: str = Field(default="", validation_alias="PIT_MOUNT_ROOTS")
     frontend_dist: Path | None = None
 
     # pipeline knobs

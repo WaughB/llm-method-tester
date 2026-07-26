@@ -1,5 +1,9 @@
 .git
 .venv
+**/.venv
+**/__pycache__
+**/node_modules
+pageindex-test/.env
 .cache
 .pytest_cache
 .ruff_cache

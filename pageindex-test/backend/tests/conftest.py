@@ -2,6 +2,7 @@
 
 import pytest
 from sqlalchemy import Engine, create_engine
+from sqlalchemy.pool import StaticPool
 
 from pageindex_test.config import Settings
 from pageindex_test.db.schema import init_schema
@@ -9,7 +10,14 @@ from pageindex_test.db.schema import init_schema
 
 @pytest.fixture
 def engine() -> Engine:
-    eng = create_engine("sqlite+pysqlite:///:memory:", future=True)
+    # StaticPool: one shared connection, or every checkout would see a brand
+    # new empty in-memory database
+    eng = create_engine(
+        "sqlite+pysqlite:///:memory:",
+        future=True,
+        poolclass=StaticPool,
+        connect_args={"check_same_thread": False},
+    )
     init_schema(eng)
     return eng
 

@@ -21,11 +21,23 @@ class AppDeps:
     engine: Engine
     health_probes: dict[str, Callable[[], dict]] = field(default_factory=dict)
     frontend_dist: Path | None = None
+    settings_repo: object = None
+    location_service: object = None
 
 
 def create_app(deps: AppDeps) -> FastAPI:
+    from pageindex_test.api.locations_router import router as locations_router
+    from pageindex_test.db.repos import SettingsRepo
+    from pageindex_test.locations import LocationService
+
+    if deps.settings_repo is None:
+        deps.settings_repo = SettingsRepo(deps.engine)
+    if deps.location_service is None:
+        deps.location_service = LocationService(deps.settings, deps.settings_repo)
+
     app = FastAPI(title="pageindex-test", version=__version__)
     app.state.deps = deps
+    app.include_router(locations_router)
 
     @app.get("/api/meta")
     def meta() -> dict:

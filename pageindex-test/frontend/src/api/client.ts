@@ -1,4 +1,4 @@
-import type { Meta } from "./types";
+import type { AppSettings, Meta, StorageLocation } from "./types";
 
 export async function getJson<T>(path: string): Promise<T> {
   const response = await fetch(path);
@@ -25,4 +25,11 @@ export async function sendJson<T>(
 
 export const api = {
   meta: () => getJson<Meta>("/api/meta"),
+  locations: () =>
+    getJson<{ locations: StorageLocation[] }>("/api/locations").then((r) => r.locations),
+  activateLocation: (location_id: string) =>
+    sendJson<StorageLocation>("PUT", "/api/locations/active", { location_id }),
+  settings: () => getJson<AppSettings>("/api/settings"),
+  updateSettings: (patch: Partial<AppSettings>) =>
+    sendJson<AppSettings>("PUT", "/api/settings", patch),
 };
