@@ -5,6 +5,7 @@ POST /api/runs returns 409 while busy. Progress is shared via a lock for the
 polling endpoint.
 """
 
+import contextlib
 import threading
 from dataclasses import dataclass
 
@@ -60,7 +61,8 @@ class RunExecutor:
             return run_id
 
     def _execute(self, runner: BenchmarkRunner, run_id: int, spec: RunRequestSpec) -> None:
-        try:
+        # a raising runner has already marked the run as failed in storage
+        with contextlib.suppress(Exception):
             runner.run(
                 models=spec.models,
                 strategy_names=spec.strategy_names,
@@ -68,8 +70,6 @@ class RunExecutor:
                 resume_run_id=run_id,
                 progress=self._on_progress,
             )
-        except Exception:  # noqa: BLE001 - runner already marked the run failed
-            pass
 
     def _on_progress(self, progress: RunProgress) -> None:
         with self._lock:

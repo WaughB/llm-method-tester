@@ -6,6 +6,7 @@ import chromadb
 import httpx
 
 from llm_bench.api.app import ApiDeps
+from llm_bench.config import Settings
 from llm_bench.corpus import BenchmarkCorpus
 from llm_bench.corpus.qa import QADataset
 from llm_bench.eval.evaluator import Evaluator
@@ -17,7 +18,6 @@ from llm_bench.strategies.baseline import BaselineStrategy
 from llm_bench.strategies.obsidian_rag import ObsidianRAGStrategy
 from llm_bench.strategies.pageindex import PageIndexStrategy
 from llm_bench.strategies.traditional_rag import TraditionalRAGStrategy
-from llm_bench.config import Settings
 
 
 def build_corpus(settings: Settings) -> BenchmarkCorpus:
