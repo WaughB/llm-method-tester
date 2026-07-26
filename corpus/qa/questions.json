@@ -1,0 +1,608 @@
+[
+  {
+    "id": "sh-01",
+    "question": "Which TCP port does the Aurora Mesh control plane listen on?",
+    "category": "single_hop",
+    "expected_keywords": [
+      [
+        "7433"
+      ]
+    ],
+    "source_docs": [
+      "docs/configuration.md"
+    ],
+    "source_notes": [
+      "vault/Reference/Port Map.md"
+    ],
+    "gold_answer": "The control plane listens on TCP port 7433."
+  },
+  {
+    "id": "sh-02",
+    "question": "What is the name of Aurora Mesh's gossip protocol?",
+    "category": "single_hop",
+    "expected_keywords": [
+      [
+        "glowcast"
+      ]
+    ],
+    "source_docs": [
+      "docs/architecture.md"
+    ],
+    "source_notes": [
+      "vault/Concepts/Glowcast Gossip.md"
+    ],
+    "gold_answer": "The gossip protocol is called glowcast; it runs over UDP port 7434."
+  },
+  {
+    "id": "sh-03",
+    "question": "What is the default consensus lease TTL in Aurora Mesh?",
+    "category": "single_hop",
+    "expected_keywords": [
+      [
+        "45 seconds"
+      ]
+    ],
+    "source_docs": [
+      "docs/replication.md"
+    ],
+    "source_notes": [
+      "vault/Concepts/Consensus Leases.md"
+    ],
+    "gold_answer": "The consensus lease TTL is 45 seconds."
+  },
+  {
+    "id": "sh-04",
+    "question": "What is the maximum size of a single configuration entry?",
+    "category": "single_hop",
+    "expected_keywords": [
+      [
+        "768 KB",
+        "768"
+      ]
+    ],
+    "source_docs": [
+      "docs/configuration.md"
+    ],
+    "source_notes": [
+      "vault/Reference/mesh.toml Defaults.md"
+    ],
+    "gold_answer": "A configuration entry is capped at 768 KB."
+  },
+  {
+    "id": "sh-05",
+    "question": "What is the name of the Aurora Mesh command-line binary?",
+    "category": "single_hop",
+    "expected_keywords": [
+      [
+        "aurctl"
+      ]
+    ],
+    "source_docs": [
+      "docs/cli-reference.md"
+    ],
+    "source_notes": [
+      "vault/Reference/aurctl CLI.md"
+    ],
+    "gold_answer": "The command-line binary is aurctl."
+  },
+  {
+    "id": "sh-06",
+    "question": "What is the name of Aurora Mesh's envelope encryption scheme?",
+    "category": "single_hop",
+    "expected_keywords": [
+      [
+        "sealbox"
+      ]
+    ],
+    "source_docs": [
+      "docs/security.md"
+    ],
+    "source_notes": [
+      "vault/Concepts/Sealbox Encryption.md"
+    ],
+    "gold_answer": "Entry values are protected by the sealbox envelope encryption scheme."
+  },
+  {
+    "id": "sh-07",
+    "question": "What is the default namespace in Aurora Mesh?",
+    "category": "single_hop",
+    "expected_keywords": [
+      [
+        "prism"
+      ]
+    ],
+    "source_docs": [
+      "docs/configuration.md"
+    ],
+    "source_notes": [
+      "vault/Reference/mesh.toml Defaults.md"
+    ],
+    "gold_answer": "The default namespace is prism."
+  },
+  {
+    "id": "sh-08",
+    "question": "Which AEAD cipher does sealbox use for its envelope layers?",
+    "category": "single_hop",
+    "expected_keywords": [
+      [
+        "XChaCha20-Poly1305",
+        "xchacha20"
+      ]
+    ],
+    "source_docs": [
+      "docs/security.md"
+    ],
+    "source_notes": [
+      "vault/Concepts/Sealbox Encryption.md"
+    ],
+    "gold_answer": "Sealbox uses XChaCha20-Poly1305 for both envelope layers."
+  },
+  {
+    "id": "sh-09",
+    "question": "On which port does the lumenlens metrics exporter serve /metrics?",
+    "category": "single_hop",
+    "expected_keywords": [
+      [
+        "9137"
+      ]
+    ],
+    "source_docs": [
+      "docs/observability.md"
+    ],
+    "source_notes": [
+      "vault/Reference/Metrics Catalog.md"
+    ],
+    "gold_answer": "The lumenlens exporter serves Prometheus metrics on HTTP port 9137."
+  },
+  {
+    "id": "sh-10",
+    "question": "Which error code does Aurora Mesh return when a consensus lease expires?",
+    "category": "single_hop",
+    "expected_keywords": [
+      [
+        "E-2201"
+      ]
+    ],
+    "source_docs": [
+      "docs/troubleshooting.md"
+    ],
+    "source_notes": [
+      "vault/Reference/Error Codes.md"
+    ],
+    "gold_answer": "An expired consensus lease surfaces as error E-2201 (LEASE_EXPIRED)."
+  },
+  {
+    "id": "sh-11",
+    "question": "Where is the canonical Aurora Mesh configuration file located?",
+    "category": "single_hop",
+    "expected_keywords": [
+      [
+        "/etc/aurora/mesh.toml",
+        "mesh.toml"
+      ]
+    ],
+    "source_docs": [
+      "docs/configuration.md"
+    ],
+    "source_notes": [
+      "vault/Reference/mesh.toml Defaults.md"
+    ],
+    "gold_answer": "The canonical configuration file is /etc/aurora/mesh.toml."
+  },
+  {
+    "id": "sh-12",
+    "question": "What is the name of Aurora Mesh's storage engine?",
+    "category": "single_hop",
+    "expected_keywords": [
+      [
+        "moonpress"
+      ]
+    ],
+    "source_docs": [
+      "docs/architecture.md"
+    ],
+    "source_notes": [
+      "vault/Concepts/Moonpress Compaction.md"
+    ],
+    "gold_answer": "Nodes persist state in the moonpress log-structured storage engine."
+  },
+  {
+    "id": "sh-13",
+    "question": "What is the codename of the Aurora Mesh 2.4 release?",
+    "category": "single_hop",
+    "expected_keywords": [
+      [
+        "Polaris"
+      ]
+    ],
+    "source_docs": [
+      "docs/changelog.md"
+    ],
+    "source_notes": [
+      "vault/Reference/Release History.md"
+    ],
+    "gold_answer": "Release 2.4 is codenamed Polaris."
+  },
+  {
+    "id": "sh-14",
+    "question": "Where do warden nodes record administrative audit events?",
+    "category": "single_hop",
+    "expected_keywords": [
+      [
+        "ledgerstream"
+      ]
+    ],
+    "source_docs": [
+      "docs/security.md"
+    ],
+    "source_notes": [
+      "vault/Runbooks/Audit Log Review.md"
+    ],
+    "gold_answer": "Wardens write every administrative action to the ledgerstream audit log, retained for 90 days."
+  },
+  {
+    "id": "mh-01",
+    "question": "Which port serves Aurora Mesh client API traffic, and what secures inter-node traffic on the other planes?",
+    "category": "multi_hop",
+    "expected_keywords": [
+      [
+        "7432"
+      ],
+      [
+        "candela"
+      ],
+      [
+        "mTLS",
+        "mutual TLS"
+      ]
+    ],
+    "source_docs": [
+      "docs/api-reference.md",
+      "docs/security.md"
+    ],
+    "source_notes": [
+      "vault/Reference/Port Map.md",
+      "vault/Architecture/Security Model.md"
+    ],
+    "gold_answer": "Clients use the gRPC API on port 7432, while inter-node traffic is protected by mTLS with certificates issued by the candela CA."
+  },
+  {
+    "id": "mh-02",
+    "question": "What is the consensus lease TTL, and how often do holders renew it?",
+    "category": "multi_hop",
+    "expected_keywords": [
+      [
+        "45 seconds"
+      ],
+      [
+        "15 seconds"
+      ]
+    ],
+    "source_docs": [
+      "docs/replication.md",
+      "docs/configuration.md"
+    ],
+    "source_notes": [
+      "vault/Concepts/Consensus Leases.md"
+    ],
+    "gold_answer": "The lease TTL is 45 seconds and holders renew every 15 seconds, one third of the TTL."
+  },
+  {
+    "id": "mh-03",
+    "question": "Which command bootstraps a new mesh, and how long is the join credential it prints valid?",
+    "category": "multi_hop",
+    "expected_keywords": [
+      [
+        "aurctl mesh init",
+        "mesh init"
+      ],
+      [
+        "24 hours"
+      ]
+    ],
+    "source_docs": [
+      "docs/quickstart.md",
+      "docs/cli-reference.md"
+    ],
+    "source_notes": [
+      "vault/Runbooks/Bootstrap a Mesh.md"
+    ],
+    "gold_answer": "aurctl mesh init bootstraps the mesh and prints an ember token that is valid for 24 hours."
+  },
+  {
+    "id": "mh-04",
+    "question": "What is Aurora Mesh's default replication factor, and how many replicas must acknowledge a write?",
+    "category": "multi_hop",
+    "expected_keywords": [
+      [
+        "replication factor of five"
+      ],
+      [
+        "write quorum of three"
+      ]
+    ],
+    "source_docs": [
+      "docs/replication.md"
+    ],
+    "source_notes": [
+      "vault/Architecture/Replication Topology.md"
+    ],
+    "gold_answer": "Entries use a replication factor of five, and writes are acknowledged after a write quorum of three replicas durably apply."
+  },
+  {
+    "id": "mh-05",
+    "question": "Where is the sealbox master key stored, and which command unlocks it after a node restart?",
+    "category": "multi_hop",
+    "expected_keywords": [
+      [
+        "kiln"
+      ],
+      [
+        "kiln unlock"
+      ]
+    ],
+    "source_docs": [
+      "docs/security.md",
+      "docs/cli-reference.md"
+    ],
+    "source_notes": [
+      "vault/Runbooks/Rotate Sealbox Keys.md"
+    ],
+    "gold_answer": "The master key lives sealed in the kiln keystore, opened with aurctl kiln unlock after a restart."
+  },
+  {
+    "id": "mh-06",
+    "question": "How many peers does glowcast contact each gossip round, and how often do rounds fire?",
+    "category": "multi_hop",
+    "expected_keywords": [
+      [
+        "fanout of six"
+      ],
+      [
+        "250 ms"
+      ]
+    ],
+    "source_docs": [
+      "docs/architecture.md"
+    ],
+    "source_notes": [
+      "vault/Concepts/Glowcast Gossip.md"
+    ],
+    "gold_answer": "Each round glowcast picks a fanout of six peers, and rounds fire every 250 ms."
+  },
+  {
+    "id": "mh-07",
+    "question": "Which error is returned when an entry exceeds the size cap, and what is that cap?",
+    "category": "multi_hop",
+    "expected_keywords": [
+      [
+        "E-1408"
+      ],
+      [
+        "768 KB",
+        "768"
+      ]
+    ],
+    "source_docs": [
+      "docs/api-reference.md",
+      "docs/configuration.md"
+    ],
+    "source_notes": [
+      "vault/Reference/Error Codes.md",
+      "vault/Reference/mesh.toml Defaults.md"
+    ],
+    "gold_answer": "Writes larger than the 768 KB entry cap fail with error E-1408 (ENTRY_TOO_LARGE)."
+  },
+  {
+    "id": "mh-08",
+    "question": "How often are sealbox data keys rotated, and how long do glimmer tokens live by default?",
+    "category": "multi_hop",
+    "expected_keywords": [
+      [
+        "72 hours"
+      ],
+      [
+        "30 days"
+      ]
+    ],
+    "source_docs": [
+      "docs/security.md"
+    ],
+    "source_notes": [
+      "vault/Concepts/Sealbox Encryption.md",
+      "vault/Concepts/Glimmer Tokens.md"
+    ],
+    "gold_answer": "Sealbox data keys rotate every 72 hours, and glimmer tokens expire after 30 days by default."
+  },
+  {
+    "id": "mh-09",
+    "question": "What triggers a raft-lite snapshot in Aurora Mesh?",
+    "category": "multi_hop",
+    "expected_keywords": [
+      [
+        "12000"
+      ],
+      [
+        "10 minutes"
+      ]
+    ],
+    "source_docs": [
+      "docs/replication.md",
+      "docs/architecture.md"
+    ],
+    "source_notes": [
+      "vault/Concepts/Raft-Lite Consensus.md"
+    ],
+    "gold_answer": "A snapshot is taken every 12000 log entries or 10 minutes, whichever comes first."
+  },
+  {
+    "id": "mh-10",
+    "question": "What mechanism detects node failures in Aurora Mesh, and at what default threshold does it mark a node suspect?",
+    "category": "multi_hop",
+    "expected_keywords": [
+      [
+        "phi-accrual"
+      ],
+      [
+        "8.5"
+      ]
+    ],
+    "source_docs": [
+      "docs/architecture.md",
+      "docs/troubleshooting.md"
+    ],
+    "source_notes": [
+      "vault/Concepts/Phi-Accrual Failure Detection.md"
+    ],
+    "gold_answer": "A phi-accrual failure detector fed by glowcast marks nodes suspect above the default threshold of 8.5."
+  },
+  {
+    "id": "ag-01",
+    "question": "List all three Aurora Mesh node roles.",
+    "category": "aggregation",
+    "expected_keywords": [
+      [
+        "lumen"
+      ],
+      [
+        "beacon"
+      ],
+      [
+        "warden"
+      ]
+    ],
+    "source_docs": [
+      "docs/overview.md"
+    ],
+    "source_notes": [
+      "vault/Concepts/Node Roles.md"
+    ],
+    "gold_answer": "The three node roles are lumen, beacon, and warden."
+  },
+  {
+    "id": "ag-02",
+    "question": "List all four scopes a glimmer token can carry.",
+    "category": "aggregation",
+    "expected_keywords": [
+      [
+        "read"
+      ],
+      [
+        "write"
+      ],
+      [
+        "admin"
+      ],
+      [
+        "audit"
+      ]
+    ],
+    "source_docs": [
+      "docs/security.md",
+      "docs/cli-reference.md"
+    ],
+    "source_notes": [
+      "vault/Concepts/Glimmer Tokens.md"
+    ],
+    "gold_answer": "The four glimmer token scopes are read, write, admin, and audit."
+  },
+  {
+    "id": "ag-03",
+    "question": "List the codenames of the three Aurora Mesh 2.x releases.",
+    "category": "aggregation",
+    "expected_keywords": [
+      [
+        "Polaris"
+      ],
+      [
+        "Meridian"
+      ],
+      [
+        "Halcyon"
+      ]
+    ],
+    "source_docs": [
+      "docs/changelog.md"
+    ],
+    "source_notes": [
+      "vault/Reference/Release History.md"
+    ],
+    "gold_answer": "The 2.x releases are 2.4 Polaris, 2.2 Meridian, and 2.0 Halcyon."
+  },
+  {
+    "id": "ag-04",
+    "question": "List all four default network ports Aurora Mesh uses.",
+    "category": "aggregation",
+    "expected_keywords": [
+      [
+        "7432"
+      ],
+      [
+        "7433"
+      ],
+      [
+        "7434"
+      ],
+      [
+        "9137"
+      ]
+    ],
+    "source_docs": [
+      "docs/overview.md",
+      "docs/configuration.md"
+    ],
+    "source_notes": [
+      "vault/Reference/Port Map.md"
+    ],
+    "gold_answer": "The default ports are 7432 (client API), 7433 (control plane), 7434 (glowcast gossip), and 9137 (lumenlens metrics)."
+  },
+  {
+    "id": "ag-05",
+    "question": "List the three documented Aurora Mesh error codes.",
+    "category": "aggregation",
+    "expected_keywords": [
+      [
+        "E-2201"
+      ],
+      [
+        "E-1408"
+      ],
+      [
+        "E-3301"
+      ]
+    ],
+    "source_docs": [
+      "docs/troubleshooting.md"
+    ],
+    "source_notes": [
+      "vault/Reference/Error Codes.md"
+    ],
+    "gold_answer": "The documented error codes are E-2201 (lease expired), E-1408 (entry too large), and E-3301 (quorum lost)."
+  },
+  {
+    "id": "ag-06",
+    "question": "Name the four components of the Aurora Mesh security stack: the envelope scheme, the keystore, the certificate authority, and the token system.",
+    "category": "aggregation",
+    "expected_keywords": [
+      [
+        "sealbox"
+      ],
+      [
+        "kiln"
+      ],
+      [
+        "candela"
+      ],
+      [
+        "glimmer"
+      ]
+    ],
+    "source_docs": [
+      "docs/security.md"
+    ],
+    "source_notes": [
+      "vault/Architecture/Security Model.md"
+    ],
+    "gold_answer": "The security stack is sealbox envelope encryption, the kiln keystore, the candela certificate authority, and glimmer tokens."
+  }
+]
