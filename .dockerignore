@@ -1,0 +1,17 @@
+.git
+.venv
+.cache
+.pytest_cache
+.ruff_cache
+__pycache__
+*.pyc
+.coverage
+coverage.xml
+htmlcov
+results.db
+frontend/node_modules
+frontend/dist
+frontend/coverage
+.github
+.claude
+tests

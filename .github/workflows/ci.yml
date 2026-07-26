@@ -65,3 +65,10 @@ jobs:
         with:
           name: frontend-dist
           path: frontend/dist
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t llm-method-tester .

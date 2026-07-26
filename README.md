@@ -75,6 +75,30 @@ Open <http://localhost:8000>. From the dashboard you can launch runs, watch live
 drill into any question to compare all twelve model×strategy answers side by side against the
 gold answer.
 
+### Docker
+
+The whole stack (Ollama + app) also runs under Docker Compose:
+
+```bash
+docker compose up -d --build
+docker compose exec ollama ollama pull gpt-oss:20b
+docker compose exec ollama ollama pull llama3.1:8b
+docker compose exec ollama ollama pull nemotron-3-nano:4b
+docker compose exec ollama ollama pull nomic-embed-text
+```
+
+Both services use `restart: unless-stopped`, so after a power outage or host reboot they come
+back up on their own as soon as Docker starts. Results and index caches persist in the
+`app-data` volume; models persist in `ollama-models` (or bind-mount an existing host model
+directory — see the comment in [docker-compose.yml](docker-compose.yml)). GPU passthrough is
+preconfigured for NVIDIA (requires the NVIDIA container toolkit; on Windows use Docker Desktop's
+WSL2 backend) — delete the `deploy:` block to run CPU-only. Benchmarks can be launched from the
+dashboard, or from the CLI inside the container:
+
+```bash
+docker compose exec app uv run llm-bench run
+```
+
 ### CLI
 
 ```text

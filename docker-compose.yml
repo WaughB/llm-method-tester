@@ -1,0 +1,47 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    # unless-stopped: containers come back automatically after a power outage /
+    # host reboot (as soon as the Docker daemon starts), but stay down if you
+    # deliberately `docker compose stop` them.
+    restart: unless-stopped
+    volumes:
+      - ollama-models:/root/.ollama
+      # Already have models pulled on the host? Bind-mount them instead of
+      # re-downloading ~24GB (replace the line above):
+      #   - D:\ollama-models:/root/.ollama/models
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    # NVIDIA GPU passthrough (requires the NVIDIA container toolkit; on
+    # Windows, Docker Desktop with the WSL2 backend). Remove this block to run
+    # CPU-only — everything works, just slower.
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  app:
+    build: .
+    image: llm-method-tester
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      LLM_BENCH_OLLAMA_BASE_URL: http://ollama:11434
+      LLM_BENCH_CACHE_DIR: /data
+    volumes:
+      - app-data:/data
+    depends_on:
+      ollama:
+        condition: service_healthy
+
+volumes:
+  ollama-models:
+  app-data:
