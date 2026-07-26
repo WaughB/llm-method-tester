@@ -12,7 +12,11 @@ Adaptations required to run it in this benchmark (disclosed in the README):
   of per-document trees and node ids are renumbered to be unique across
   documents (same 4-digit format their `if_add_node_id` produces);
 - models are addressed as `ollama/<name>` through LiteLLM, exactly as their
-  utils supports.
+  utils supports;
+- the tree JSON is serialized compactly instead of the cookbook's `indent=2`:
+  pretty-printing pushed the prompt past local models' 16k context window
+  (nemotron tokenized it at ~17k and Ollama truncated the question away).
+  Content is identical, only whitespace differs.
 """
 
 import asyncio
@@ -157,7 +161,7 @@ class PageIndexOfficialStrategy(RetrievalStrategy):
                 }
                 for t in self._trees
             ],
-            indent=2,
+            separators=(",", ":"),
         )
         search_prompt = _SEARCH_PROMPT.format(query=question.question, tree_json=documents_json)
         text, usage = self._call_llm(model, search_prompt)
