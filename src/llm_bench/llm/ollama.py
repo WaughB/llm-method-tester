@@ -1,5 +1,7 @@
 """Ollama HTTP clients for generation and embeddings."""
 
+import json
+
 import httpx
 
 from llm_bench.llm.base import EmbeddingClient, GenOptions, LLMClient, LLMResponse
@@ -40,6 +42,16 @@ class OllamaClient(LLMClient):
         options: GenOptions | None = None,
     ) -> LLMResponse:
         opts = options or GenOptions()
+        if json_schema is not None:
+            # Ollama's grammar-based `format` yields EMPTY responses on
+            # reasoning models (gpt-oss, nemotron nano) — the tokens go into
+            # thinking and constrained decoding produces nothing. Instructing
+            # JSON in the prompt works across all models; callers parse with
+            # jsonutil.extract_json.
+            prompt = (
+                f"{prompt}\n\nRespond with ONLY a single JSON object matching this "
+                f"schema (no prose, no code fences):\n{json.dumps(json_schema)}"
+            )
         payload: dict = {
             "model": model,
             "prompt": prompt,
@@ -53,8 +65,6 @@ class OllamaClient(LLMClient):
         }
         if system is not None:
             payload["system"] = system
-        if json_schema is not None:
-            payload["format"] = json_schema
         data = self._post("/api/generate", payload)
         return LLMResponse(
             text=data.get("response", ""),

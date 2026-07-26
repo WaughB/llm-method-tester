@@ -47,7 +47,9 @@ class TestOllamaClientGenerate:
         assert resp.completion_tokens == 7
         assert resp.tokens_per_sec == 10.0
 
-    def test_json_schema_passed_as_format(self) -> None:
+    def test_json_schema_becomes_prompt_instruction_not_format(self) -> None:
+        # Ollama's grammar `format` breaks reasoning models (empty responses),
+        # so the schema must be injected into the prompt instead.
         seen: dict = {}
         schema = {"type": "object", "properties": {"score": {"type": "integer"}}}
 
@@ -56,7 +58,10 @@ class TestOllamaClientGenerate:
             return httpx.Response(200, json={"response": "{}"})
 
         make_client(handler).generate("m", "p", json_schema=schema)
-        assert seen["payload"]["format"] == schema
+        assert "format" not in seen["payload"]
+        assert seen["payload"]["prompt"].startswith("p")
+        assert "ONLY a single JSON object" in seen["payload"]["prompt"]
+        assert json.dumps(schema) in seen["payload"]["prompt"]
 
     def test_model_missing_raises_ollama_error_with_detail(self) -> None:
         def handler(request: httpx.Request) -> httpx.Response:

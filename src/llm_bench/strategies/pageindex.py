@@ -19,6 +19,7 @@ from llm_bench.corpus import BenchmarkCorpus
 from llm_bench.corpus.documents import Document
 from llm_bench.corpus.qa import Question
 from llm_bench.llm.base import GenOptions, LLMClient
+from llm_bench.llm.jsonutil import extract_json
 from llm_bench.strategies.base import ANSWER_SYSTEM, RetrievalStrategy, StrategyAnswer
 
 _HEADING_RE = re.compile(r"^(#{1,6})\s+(.+)$")
@@ -147,7 +148,9 @@ class PageIndexStrategy(RetrievalStrategy):
         self._llm = llm
         self._cache_dir = cache_dir
         self._max_select = max_select
-        self._options = options or GenOptions()
+        # The tree outline is by far the largest prompt in the benchmark; the
+        # default 8k context silently truncates it and the model selects nothing.
+        self._options = options or GenOptions(num_ctx=16384)
         self._forest: list[TreeNode] = []
         self._nodes: dict[str, TreeNode] = {}
         self._summaries: dict[str, str] = {}
@@ -182,7 +185,9 @@ class PageIndexStrategy(RetrievalStrategy):
         llm_calls = 0
         prompt_tokens = completion_tokens = 0
 
-        outline = "\n".join(self._outline_lines(self._forest, depth=0))
+        # First pass sees roots + H2 sections only (PageIndex descends rather
+        # than dumping the whole tree); deeper nodes appear in the refinement.
+        outline = "\n".join(self._outline_lines(self._forest, depth=0, max_depth=1))
         select_prompt = _SELECT_TEMPLATE.format(
             question=question.question, outline=outline, k=self._max_select
         )
@@ -234,23 +239,27 @@ class PageIndexStrategy(RetrievalStrategy):
         )
 
     def _outline_lines(
-        self, nodes: Iterable[TreeNode], depth: int, children_only: bool = False
+        self,
+        nodes: Iterable[TreeNode],
+        depth: int,
+        max_depth: int | None = None,
+        children_only: bool = False,
     ) -> list[str]:
         lines: list[str] = []
         for node in nodes:
-            if not children_only:
-                summary = self._summaries.get(node.node_id, "")
-                lines.append(f"{'  ' * depth}[{node.node_id}] {node.title} - {summary}")
-                lines.extend(self._outline_lines(node.children, depth + 1))
-            else:
+            if children_only:
                 lines.append(f"[{node.node_id}] {node.title} (context: parent section)")
                 lines.extend(self._outline_lines(node.children, depth + 1))
+                continue
+            summary = self._summaries.get(node.node_id, "")
+            lines.append(f"{'  ' * depth}[{node.node_id}] {node.title} - {summary}")
+            if max_depth is None or depth < max_depth:
+                lines.extend(self._outline_lines(node.children, depth + 1, max_depth))
         return lines
 
     def _parse_selection(self, text: str) -> list[TreeNode]:
-        try:
-            data = json.loads(text)
-            ids = [str(i) for i in data.get("node_ids", [])]
-        except (ValueError, AttributeError):
+        data = extract_json(text)
+        if data is None:
             return []
+        ids = [str(i) for i in data.get("node_ids", []) or []]
         return [self._nodes[i] for i in ids if i in self._nodes][: self._max_select]

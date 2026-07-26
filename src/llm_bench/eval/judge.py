@@ -6,10 +6,10 @@ avoid identity bias (including self-preference, since the judge model is also
 one of the benchmarked models).
 """
 
-import json
 from dataclasses import dataclass
 
 from llm_bench.llm.base import GenOptions, LLMClient
+from llm_bench.llm.jsonutil import extract_json
 
 JUDGE_SCHEMA = {
     "type": "object",
@@ -80,13 +80,15 @@ class LLMJudge:
 
     @staticmethod
     def _parse(text: str) -> JudgeResult:
+        data = extract_json(text)
+        if data is None:
+            return JudgeResult(score=0, verdict="unparseable", reasoning=text[:500])
         try:
-            data = json.loads(text)
             score = max(0, min(5, int(data["score"])))
-            return JudgeResult(
-                score=score,
-                verdict=str(data.get("verdict", "partial")),
-                reasoning=str(data.get("reasoning", "")),
-            )
         except (ValueError, KeyError, TypeError):
             return JudgeResult(score=0, verdict="unparseable", reasoning=text[:500])
+        return JudgeResult(
+            score=score,
+            verdict=str(data.get("verdict", "partial")),
+            reasoning=str(data.get("reasoning", "")),
+        )

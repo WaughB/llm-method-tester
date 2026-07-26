@@ -110,6 +110,19 @@ class TestPageIndexStrategy:
         assert answer.text == "best-effort answer"
         assert answer.retrieved_ids == []
 
+    def test_first_selection_outline_capped_at_h2_depth(
+        self,
+        prepared: tuple[PageIndexStrategy, FakeLLMClient],
+        mini_dataset: QADataset,
+    ) -> None:
+        strategy, fake = prepared
+        strategy.answer(mini_dataset.get("q001"), "model-a")
+        selection_prompt = next(c.prompt for c in fake.calls if "Select up to" in c.prompt)
+        # depth-2 subsection (api.md > Endpoints > Authentication) is hidden
+        # from the first pass; it becomes reachable via refinement
+        assert "[n0002]" in selection_prompt  # Endpoints (depth 1)
+        assert "[n0003]" not in selection_prompt  # Authentication (depth 2)
+
     def test_outline_contains_ids_titles_summaries(
         self,
         prepared: tuple[PageIndexStrategy, FakeLLMClient],
