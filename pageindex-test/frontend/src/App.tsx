@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { NavLink, Navigate, Route, Routes } from "react-router-dom";
 import { api } from "./api/client";
+import Documents from "./pages/Documents";
 import Settings from "./pages/Settings";
 
 const NAV = [
@@ -80,7 +81,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/chat" replace />} />
           <Route path="/chat" element={<Placeholder title="Chat" />} />
-          <Route path="/documents" element={<Placeholder title="Documents" />} />
+          <Route path="/documents" element={<Documents />} />
           <Route path="/eval" element={<Placeholder title="Eval" />} />
           <Route path="/logs" element={<Placeholder title="Logs" />} />
           <Route path="/settings" element={<Settings />} />

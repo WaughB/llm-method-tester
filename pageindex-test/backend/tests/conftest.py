@@ -25,3 +25,18 @@ def engine() -> Engine:
 @pytest.fixture
 def settings() -> Settings:
     return Settings(_env_file=None)
+
+
+def make_pdf(path, pages, toc=None):
+    """Build a small real PDF for extraction tests."""
+    import pymupdf
+
+    doc = pymupdf.open()
+    for text in pages:
+        page = doc.new_page()
+        page.insert_text((72, 72), text)
+    if toc:
+        doc.set_toc(toc)
+    doc.save(path)
+    doc.close()
+    return path

@@ -24,12 +24,14 @@ def worker() -> None:
     """Run the job worker loop."""
     from pageindex_test.db.schema import init_schema, make_engine
     from pageindex_test.obs.jsonlog import configure_logging
+    from pageindex_test.runtime import register_job_handlers
     from pageindex_test.worker import run_forever
 
     settings = Settings()
     engine = make_engine(settings.database_url)
     init_schema(engine)
     configure_logging(engine)
+    register_job_handlers(engine, settings)
     run_forever(engine)
 
 

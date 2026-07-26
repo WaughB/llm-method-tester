@@ -29,3 +29,26 @@ export interface AppSettings {
   tree_stage_docs: number;
   use_pageindex_stage: boolean;
 }
+
+export type DocStatus = "pending" | "processing" | "ready" | "unsupported" | "error";
+
+export interface DocumentRow {
+  id: string;
+  filename: string;
+  format: string;
+  status: DocStatus;
+  error: string | null;
+  title: string | null;
+  pages: number | null;
+  chunk_count: number | null;
+  created_at: string;
+}
+
+export interface Job {
+  id: number;
+  type: string;
+  status: "queued" | "running" | "done" | "error";
+  error: string | null;
+  payload: Record<string, unknown>;
+  created_at: string;
+}

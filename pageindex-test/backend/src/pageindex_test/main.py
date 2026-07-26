@@ -23,21 +23,38 @@ class AppDeps:
     frontend_dist: Path | None = None
     settings_repo: object = None
     location_service: object = None
+    document_repo: object = None
+    chunk_repo: object = None
+    job_repo: object = None
+    vector_index_factory: Callable[[str], object] | None = None
 
 
 def create_app(deps: AppDeps) -> FastAPI:
+    from pageindex_test.api.documents_router import router as documents_router
     from pageindex_test.api.locations_router import router as locations_router
-    from pageindex_test.db.repos import SettingsRepo
+    from pageindex_test.db.repos import ChunkRepo, DocumentRepo, JobRepo, SettingsRepo
     from pageindex_test.locations import LocationService
+    from pageindex_test.retrieval.vectors import QdrantIndex
 
     if deps.settings_repo is None:
         deps.settings_repo = SettingsRepo(deps.engine)
     if deps.location_service is None:
         deps.location_service = LocationService(deps.settings, deps.settings_repo)
+    if deps.document_repo is None:
+        deps.document_repo = DocumentRepo(deps.engine)
+    if deps.chunk_repo is None:
+        deps.chunk_repo = ChunkRepo(deps.engine)
+    if deps.job_repo is None:
+        deps.job_repo = JobRepo(deps.engine)
+    if deps.vector_index_factory is None:
+        deps.vector_index_factory = lambda location_id: QdrantIndex(
+            deps.settings.qdrant_url, location_id
+        )
 
     app = FastAPI(title="pageindex-test", version=__version__)
     app.state.deps = deps
     app.include_router(locations_router)
+    app.include_router(documents_router)
 
     @app.get("/api/meta")
     def meta() -> dict:

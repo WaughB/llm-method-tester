@@ -1,4 +1,4 @@
-import type { AppSettings, Meta, StorageLocation } from "./types";
+import type { AppSettings, DocumentRow, Job, Meta, StorageLocation } from "./types";
 
 export async function getJson<T>(path: string): Promise<T> {
   const response = await fetch(path);
@@ -32,4 +32,23 @@ export const api = {
   settings: () => getJson<AppSettings>("/api/settings"),
   updateSettings: (patch: Partial<AppSettings>) =>
     sendJson<AppSettings>("PUT", "/api/settings", patch),
+  documents: () =>
+    getJson<{ documents: DocumentRow[] }>("/api/documents").then((r) => r.documents),
+  deleteDocument: (docId: string) => sendJson<unknown>("DELETE", `/api/documents/${docId}`),
+  importPath: (path: string) =>
+    sendJson<{ queued: unknown[] }>("POST", "/api/documents/import", { path }),
+  uploadDocument: async (file: File): Promise<{ doc_id: string; job_id: number }> => {
+    const form = new FormData();
+    form.append("file", file);
+    const response = await fetch("/api/documents", { method: "POST", body: form });
+    if (!response.ok) {
+      const detail = await response.json().catch(() => null);
+      throw new Error(detail?.detail ?? `upload failed (${response.status})`);
+    }
+    return response.json();
+  },
+  jobs: (status?: string) =>
+    getJson<{ jobs: Job[] }>(status ? `/api/jobs?status=${status}` : "/api/jobs").then(
+      (r) => r.jobs,
+    ),
 };
