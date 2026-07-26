@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "llm-bench",
+      "runtimeExecutable": "uv",
+      "runtimeArgs": ["run", "llm-bench", "serve"],
+      "port": 8000
+    }
+  ]
+}

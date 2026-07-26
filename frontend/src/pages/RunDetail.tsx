@@ -35,7 +35,7 @@ export default function RunDetail() {
     () => new Map((questions.data ?? []).map((q) => [q.id, q])),
     [questions.data],
   );
-  const rows = results.data ?? [];
+  const rows = useMemo(() => results.data ?? [], [results.data]);
   const questionIds = useMemo(() => [...new Set(rows.map((r) => r.question_id))], [rows]);
 
   if (run.isLoading) return <p className="text-sub">loading run…</p>;
