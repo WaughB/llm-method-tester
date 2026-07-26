@@ -2,7 +2,7 @@
 
 **Benchmark how much retrieval strategy actually matters for local LLMs.**
 
-[![CI](https://github.com/bwaugh/llm-method-tester/actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
+[![CI](https://github.com/WaughB/llm-method-tester/actions/workflows/ci.yml/badge.svg)](https://github.com/WaughB/llm-method-tester/actions/workflows/ci.yml)
 ![Coverage](https://img.shields.io/badge/backend_coverage-%E2%89%A597%25-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
@@ -52,7 +52,7 @@ attributable to retrieval, not memorization.
 Prerequisites: [uv](https://docs.astral.sh/uv/), Node 18.18+, [Ollama](https://ollama.com) ≥ 0.32.
 
 ```bash
-git clone https://github.com/bwaugh/llm-method-tester
+git clone https://github.com/WaughB/llm-method-tester
 cd llm-method-tester
 uv sync
 ollama pull gpt-oss:20b && ollama pull llama3.1:8b && ollama pull nemotron-3-nano:4b && ollama pull nomic-embed-text
