@@ -66,15 +66,18 @@ gold sources present in what the strategy retrieved. Latency = mean seconds per 
 | gpt-oss:20b | Baseline | 0.30 | 3% | — | 39.1s | 1 |
 | gpt-oss:20b | Vector RAG | 4.60 | 78% | 88% | 4.4s | 1 |
 | gpt-oss:20b | Obsidian RAG | 4.60 | 75% | 82% | 4.5s | 1 |
-| gpt-oss:20b | **PageIndex** | **5.00** | 82% | 83% | 38.4s | 3 |
+| gpt-oss:20b | **PageIndex (reimpl)** | **5.00** | 82% | 83% | 38.4s | 3 |
+| gpt-oss:20b | PageIndex (official) | 4.83 | 82% | **95%** | 33.5s | 2 |
 | llama3.1:8b | Baseline | 0.20 | 3% | — | 48.0s | 1 |
 | llama3.1:8b | Vector RAG | 4.53 | 83% | 88% | 0.8s | 1 |
 | llama3.1:8b | Obsidian RAG | 4.47 | 87% | 82% | 2.7s | 1 |
-| llama3.1:8b | **PageIndex** | **4.53** | 88% | 78% | 3.8s | 3 |
+| llama3.1:8b | PageIndex (reimpl) | 4.53 | 88% | 78% | 3.8s | 3 |
+| llama3.1:8b | **PageIndex (official)** | **4.80** | 89% | 70% | 6.5s | 2 |
 | nemotron-3-nano:4b | Baseline | 0.20 | 4% | — | 3.2s | 1 |
 | nemotron-3-nano:4b | Vector RAG | 4.60 | 76% | 88% | 1.3s | 1 |
 | nemotron-3-nano:4b | Obsidian RAG | 4.60 | 72% | 82% | 1.1s | 1 |
-| nemotron-3-nano:4b | **PageIndex** | **4.70** | 77% | 73% | 6.9s | 3 |
+| nemotron-3-nano:4b | **PageIndex (reimpl)** | **4.70** | 77% | 73% | 6.9s | 3 |
+| nemotron-3-nano:4b | PageIndex (official) | 3.37 | 56% | 55% | 6.5s | 2 |
 
 **What the numbers say:**
 
@@ -84,8 +87,17 @@ gold sources present in what the strategy retrieved. Latency = mean seconds per 
   access matters far more than parameter count on this task (a 4B model with RAG crushes a
   20B model without it).
 - **PageIndex wins on answer quality on all three models** (a perfect 5.00 on gpt-oss), but
-  pays for it: 3 LLM calls per question and up to ~9× the latency of vector RAG on the same
+  pays for it: 2–3 LLM calls per question and up to ~9× the latency of vector RAG on the same
   model. Reasoning-based retrieval is a quality/cost trade, not a free win.
+- **The official PageIndex code and the reimplementation agree on capable models** — within
+  0.2–0.3 judge points on gpt-oss and llama, mutually validating both. On the 4B nemotron the
+  official single-pass tree selection degrades (3.37 vs 4.70): choosing among all 174 nodes in
+  one shot is harder for a small model than the reimplementation's two-stage capped-outline
+  descent. Method structure matters more as models shrink.
+- The full-tree prompt is also a context-window hazard: on nemotron's tokenizer the
+  pretty-printed tree exceeded 16k tokens and Ollama silently truncated the question away
+  (compact serialization fixed it — see the strategy docstring). Vectorless retrieval's
+  scaling limit is the context window, and it fails silently when hit.
 - **Vector RAG has the best retrieval hit rate (88%) and the best speed**, making it the
   efficiency sweet spot; Obsidian RAG's graph traversal lands close behind on entirely
   deterministic, embedding-free retrieval.
