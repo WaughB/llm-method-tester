@@ -43,6 +43,10 @@ src = ["src", "tests"]
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM", "W"]
 
+[tool.ruff.lint.per-file-ignores]
+# typer's API is built on function calls in argument defaults
+"src/llm_bench/cli.py" = ["B008"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-m 'not live' --cov=llm_bench --cov-report=term-missing --cov-fail-under=80"
