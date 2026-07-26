@@ -26,3 +26,7 @@ frontend/coverage/
 Thumbs.db
 .idea/
 .vscode/
+
+# pageindex-test local
+pageindex-test/.env
+pageindex-test/.empty-store/

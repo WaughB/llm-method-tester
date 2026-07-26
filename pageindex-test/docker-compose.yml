@@ -1,0 +1,89 @@
+# Run from the pageindex-test/ directory:  docker compose up -d --build
+# Storage roots: set PIT_ROOT_0 (required) and optionally PIT_ROOT_1 in .env —
+# they become the storage locations selectable in the app's Settings page.
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: pageindex-test/Dockerfile
+    image: pageindex-test
+    restart: unless-stopped
+    ports:
+      - "8100:8100"
+    environment: &app-env
+      PIT_DATABASE_URL: postgresql+psycopg://pageindex:pageindex@postgres:5432/pageindex
+      PIT_QDRANT_URL: http://qdrant:6333
+      # host Ollama by default; switch to http://ollama:11434 with --profile local-ollama
+      PIT_OLLAMA_BASE_URL: ${PIT_OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      PIT_MOUNT_ROOTS: "/mnt/store0=${PIT_ROOT_0:?set PIT_ROOT_0 in .env};/mnt/store1=${PIT_ROOT_1:-}"
+      PIT_DEFAULT_MODEL: ${PIT_DEFAULT_MODEL:-llama3.1:8b}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes: &app-volumes
+      - "${PIT_ROOT_0:?set PIT_ROOT_0 in .env}:/mnt/store0"
+      - "${PIT_ROOT_1:-./.empty-store}:/mnt/store1"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+
+  worker:
+    image: pageindex-test
+    restart: unless-stopped
+    command: ["uv", "run", "--no-sync", "pageindex-test", "worker"]
+    environment: *app-env
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes: *app-volumes
+    depends_on:
+      postgres:
+        condition: service_healthy
+      qdrant:
+        condition: service_started
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: pageindex
+      POSTGRES_PASSWORD: pageindex
+      POSTGRES_DB: pageindex
+    # named volume only — never bind-mount Postgres data onto NTFS
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pageindex"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    restart: unless-stopped
+    volumes:
+      - qdrant-data:/qdrant/storage
+
+  # Optional self-contained Ollama:  docker compose --profile local-ollama up -d
+  # Then set PIT_OLLAMA_BASE_URL=http://ollama:11434 in .env
+  ollama:
+    profiles: ["local-ollama"]
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    environment:
+      OLLAMA_CONTEXT_LENGTH: "16384"
+    volumes:
+      - ollama-models:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+volumes:
+  pg-data:
+  qdrant-data:
+  ollama-models:
