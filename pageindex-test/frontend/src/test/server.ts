@@ -13,6 +13,9 @@ export const metaFixture: Meta = {
   },
 };
 
-export const handlers = [http.get("/api/meta", () => HttpResponse.json(metaFixture))];
+export const handlers = [
+  http.get("/api/meta", () => HttpResponse.json(metaFixture)),
+  http.get("/api/conversations", () => HttpResponse.json({ conversations: [] })),
+];
 
 export const server = setupServer(...handlers);

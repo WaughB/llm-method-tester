@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { NavLink, Navigate, Route, Routes } from "react-router-dom";
 import { api } from "./api/client";
+import Chat from "./pages/Chat";
 import Documents from "./pages/Documents";
 import Settings from "./pages/Settings";
 
@@ -80,7 +81,7 @@ export default function App() {
       <main className="flex-1 min-w-0 px-8 py-8 max-w-[1500px]">
         <Routes>
           <Route path="/" element={<Navigate to="/chat" replace />} />
-          <Route path="/chat" element={<Placeholder title="Chat" />} />
+          <Route path="/chat" element={<Chat />} />
           <Route path="/documents" element={<Documents />} />
           <Route path="/eval" element={<Placeholder title="Eval" />} />
           <Route path="/logs" element={<Placeholder title="Logs" />} />

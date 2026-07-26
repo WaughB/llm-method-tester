@@ -5,7 +5,15 @@ from datetime import UTC, datetime
 
 from sqlalchemy import Engine, delete, select
 
-from pageindex_test.db.schema import app_settings, chunks, documents, jobs
+from pageindex_test.db.schema import (
+    app_settings,
+    chunks,
+    conversations,
+    documents,
+    jobs,
+    messages,
+    query_traces,
+)
 
 
 def utcnow() -> str:
@@ -154,3 +162,92 @@ class JobRepo:
         with self._engine.connect() as conn:
             rows = conn.execute(query).mappings().fetchall()
         return [dict(r) for r in rows]
+
+
+class ConversationRepo:
+    def __init__(self, engine: Engine) -> None:
+        self._engine = engine
+
+    def create(self, location_id: str, title: str, model: str) -> str:
+        conversation_id = str(uuid.uuid4())
+        with self._engine.begin() as conn:
+            conn.execute(
+                conversations.insert().values(
+                    id=conversation_id,
+                    location_id=location_id,
+                    title=title,
+                    model=model,
+                    use_pageindex_stage=True,
+                    created_at=utcnow(),
+                )
+            )
+        return conversation_id
+
+    def get(self, conversation_id: str) -> dict | None:
+        with self._engine.connect() as conn:
+            row = (
+                conn.execute(select(conversations).where(conversations.c.id == conversation_id))
+                .mappings()
+                .fetchone()
+            )
+        return dict(row) if row else None
+
+    def list_for_location(self, location_id: str) -> list[dict]:
+        with self._engine.connect() as conn:
+            rows = (
+                conn.execute(
+                    select(conversations)
+                    .where(conversations.c.location_id == location_id)
+                    .order_by(conversations.c.created_at.desc())
+                )
+                .mappings()
+                .fetchall()
+            )
+        return [dict(r) for r in rows]
+
+    def add_message(
+        self,
+        conversation_id: str,
+        role: str,
+        content: str,
+        citations: list | None = None,
+        trace_id: str | None = None,
+    ) -> None:
+        with self._engine.begin() as conn:
+            conn.execute(
+                messages.insert().values(
+                    conversation_id=conversation_id,
+                    role=role,
+                    content=content,
+                    citations=citations,
+                    trace_id=trace_id,
+                    created_at=utcnow(),
+                )
+            )
+
+    def messages_for(self, conversation_id: str) -> list[dict]:
+        with self._engine.connect() as conn:
+            rows = (
+                conn.execute(
+                    select(messages)
+                    .where(messages.c.conversation_id == conversation_id)
+                    .order_by(messages.c.id)
+                )
+                .mappings()
+                .fetchall()
+            )
+        return [dict(r) for r in rows]
+
+
+class TraceRepo:
+    def __init__(self, engine: Engine) -> None:
+        self._engine = engine
+
+    def get(self, trace_id: str) -> dict | None:
+        with self._engine.connect() as conn:
+            row = (
+                conn.execute(select(query_traces).where(query_traces.c.trace_id == trace_id))
+                .mappings()
+                .fetchone()
+            )
+        return dict(row) if row else None

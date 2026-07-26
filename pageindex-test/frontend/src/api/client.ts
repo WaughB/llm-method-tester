@@ -1,4 +1,12 @@
-import type { AppSettings, DocumentRow, Job, Meta, StorageLocation } from "./types";
+import type {
+  AppSettings,
+  AskResponse,
+  Conversation,
+  DocumentRow,
+  Job,
+  Meta,
+  StorageLocation,
+} from "./types";
 
 export async function getJson<T>(path: string): Promise<T> {
   const response = await fetch(path);
@@ -51,4 +59,16 @@ export const api = {
     getJson<{ jobs: Job[] }>(status ? `/api/jobs?status=${status}` : "/api/jobs").then(
       (r) => r.jobs,
     ),
+  conversations: () =>
+    getJson<{ conversations: Conversation[] }>("/api/conversations").then(
+      (r) => r.conversations,
+    ),
+  conversation: (id: string) => getJson<Conversation>(`/api/conversations/${id}`),
+  createConversation: (body: { title?: string; model?: string }) =>
+    sendJson<Conversation>("POST", "/api/conversations", body),
+  ask: (conversationId: string, question: string, usePageindexStage?: boolean) =>
+    sendJson<AskResponse>("POST", `/api/conversations/${conversationId}/messages`, {
+      question,
+      use_pageindex_stage: usePageindexStage,
+    }),
 };

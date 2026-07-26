@@ -44,6 +44,40 @@ export interface DocumentRow {
   created_at: string;
 }
 
+export interface Citation {
+  doc_id: string;
+  chunk_id: string | null;
+  heading: string;
+  snippet: string;
+}
+
+export interface Message {
+  id: number;
+  role: "user" | "assistant";
+  content: string;
+  citations: Citation[] | null;
+  trace_id: string | null;
+  created_at: string;
+}
+
+export interface Conversation {
+  id: string;
+  title: string;
+  model: string;
+  use_pageindex_stage: boolean;
+  created_at: string;
+  messages?: Message[];
+}
+
+export interface AskResponse {
+  answer: string;
+  citations: Citation[];
+  trace_id: string;
+  pipeline: "staged" | "hybrid_only";
+  total_ms: number;
+  stages: { name: string; ms: number; candidates: number; tokens: number }[];
+}
+
 export interface Job {
   id: number;
   type: string;

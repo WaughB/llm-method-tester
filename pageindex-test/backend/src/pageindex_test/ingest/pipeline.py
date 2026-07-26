@@ -53,12 +53,13 @@ class IngestPipeline:
             self._documents.update(doc_id, status="error", error=str(exc))
             return
 
+        title = extracted.title
+        if title in ("original", ""):  # stored uploads are named original.<ext>
+            title = Path(doc["filename"]).stem
         extracted_path.parent.mkdir(parents=True, exist_ok=True)
         extracted_path.write_text(extracted.markdown, encoding="utf-8", newline="\n")
 
-        pieces = chunk_document(
-            Document(doc_id=doc_id, title=extracted.title, text=extracted.markdown)
-        )
+        pieces = chunk_document(Document(doc_id=doc_id, title=title, text=extracted.markdown))
         chunk_rows = [
             {
                 "id": piece.chunk_id,
@@ -85,7 +86,7 @@ class IngestPipeline:
         self._documents.update(
             doc_id,
             status="ready",
-            title=extracted.title,
+            title=title,
             pages=extracted.pages,
             chunk_count=len(chunk_rows),
             error=None,

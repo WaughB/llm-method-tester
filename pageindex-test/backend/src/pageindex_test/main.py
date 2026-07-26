@@ -26,14 +26,30 @@ class AppDeps:
     document_repo: object = None
     chunk_repo: object = None
     job_repo: object = None
+    conversation_repo: object = None
+    trace_repo: object = None
     vector_index_factory: Callable[[str], object] | None = None
+    lexical_index: object = None
+    query_pipeline: object = None
 
 
 def create_app(deps: AppDeps) -> FastAPI:
+    from llm_bench.llm.ollama import OllamaClient, OllamaEmbeddingClient
+
+    from pageindex_test.api.chat_router import router as chat_router
     from pageindex_test.api.documents_router import router as documents_router
     from pageindex_test.api.locations_router import router as locations_router
-    from pageindex_test.db.repos import ChunkRepo, DocumentRepo, JobRepo, SettingsRepo
+    from pageindex_test.db.repos import (
+        ChunkRepo,
+        ConversationRepo,
+        DocumentRepo,
+        JobRepo,
+        SettingsRepo,
+        TraceRepo,
+    )
     from pageindex_test.locations import LocationService
+    from pageindex_test.pipeline.query import QueryPipeline
+    from pageindex_test.retrieval.lexical import Bm25Index
     from pageindex_test.retrieval.vectors import QdrantIndex
 
     if deps.settings_repo is None:
@@ -46,15 +62,35 @@ def create_app(deps: AppDeps) -> FastAPI:
         deps.chunk_repo = ChunkRepo(deps.engine)
     if deps.job_repo is None:
         deps.job_repo = JobRepo(deps.engine)
+    if deps.conversation_repo is None:
+        deps.conversation_repo = ConversationRepo(deps.engine)
+    if deps.trace_repo is None:
+        deps.trace_repo = TraceRepo(deps.engine)
     if deps.vector_index_factory is None:
         deps.vector_index_factory = lambda location_id: QdrantIndex(
             deps.settings.qdrant_url, location_id
+        )
+    if deps.lexical_index is None:
+        deps.lexical_index = Bm25Index()
+    if deps.query_pipeline is None:
+        settings = deps.settings
+        deps.query_pipeline = QueryPipeline(
+            engine=deps.engine,
+            chunks=deps.chunk_repo,
+            lexical=deps.lexical_index,
+            embedder=OllamaEmbeddingClient(
+                settings.ollama_base_url, model=settings.embedding_model
+            ),
+            vector_index_factory=deps.vector_index_factory,
+            llm=OllamaClient(settings.ollama_base_url, timeout_s=settings.request_timeout_s),
+            hybrid_top_n=settings.hybrid_top_n,
         )
 
     app = FastAPI(title="pageindex-test", version=__version__)
     app.state.deps = deps
     app.include_router(locations_router)
     app.include_router(documents_router)
+    app.include_router(chat_router)
 
     @app.get("/api/meta")
     def meta() -> dict:

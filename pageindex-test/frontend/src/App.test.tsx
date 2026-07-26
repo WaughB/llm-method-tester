@@ -12,7 +12,8 @@ describe("App shell", () => {
     for (const label of ["Chat", "Documents", "Eval", "Logs", "Settings"]) {
       expect(screen.getByRole("link", { name: new RegExp(label) })).toBeInTheDocument();
     }
-    expect(await screen.findByRole("heading", { name: "Chat" })).toBeInTheDocument();
+    // "/" redirects to the Chat page's empty state
+    expect(await screen.findByText(/Start a new conversation/)).toBeInTheDocument();
   });
 
   it("shows green health checks from /api/meta", async () => {
