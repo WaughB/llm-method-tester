@@ -43,6 +43,10 @@ class BenchmarkRunner:
         self._strategies = {s.name: s for s in strategies}
         self._evaluator = evaluator
 
+    @property
+    def available_strategies(self) -> list[str]:
+        return list(self._strategies)
+
     def run(
         self,
         models: list[str],
