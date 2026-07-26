@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from llm_bench.corpus import BenchmarkCorpus
+from llm_bench.corpus.qa import QADataset
 from llm_bench.llm.fake import FakeEmbeddingClient, FakeLLMClient
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -18,6 +19,11 @@ def mini_corpus_root() -> Path:
 @pytest.fixture
 def mini_corpus(mini_corpus_root: Path) -> BenchmarkCorpus:
     return BenchmarkCorpus.load(mini_corpus_root)
+
+
+@pytest.fixture
+def mini_dataset(mini_corpus_root: Path) -> QADataset:
+    return QADataset.load(mini_corpus_root / "qa" / "questions.json")
 
 
 @pytest.fixture
