@@ -107,6 +107,7 @@ class BenchmarkRunner:
         pending = self._evaluator.judgeable(self._repo.unjudged_results(run_id))
         total = matrix_total + len(pending)
         for i, result in enumerate(pending, start=1):
+            cell = f"{result.model} / {result.strategy} / {result.question_id}"
             question = self._dataset.get(result.question_id)
             judge_result = self._evaluator.judge_answer(question, result.answer)
             if judge_result is not None and result.id is not None:
@@ -118,7 +119,7 @@ class BenchmarkRunner:
                     RunProgress(
                         total=total,
                         done=matrix_total + i,
-                        current=f"judging / {result.model} / {result.strategy} / {result.question_id}",
+                        current=f"judging / {cell}",
                     )
                 )
 
