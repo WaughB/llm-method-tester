@@ -123,23 +123,38 @@ def main() -> None:
         "Mean judge score across all three models (0–5). Gray = no-retrieval control.",
         [row[1] for row in DATA],
         lambda v: f"{v:.2f}",
-        note="Fictional corpus: the control proves retrieval, not memorization, drives every score above it.",
+        note=(
+            "Fictional corpus: the control proves retrieval, not memorization, "
+            "drives every score above it."
+        ),
     )
     write_pair(
         "latency",
         "Latency per question",
-        "Mean seconds per question across all three models (RTX 3080, includes all retrieval + generation calls).",
+        (
+            "Mean seconds per question across all three models "
+            "(RTX 3080, includes all retrieval + generation calls)."
+        ),
         [row[2] for row in DATA],
         lambda v: f"{v:.1f}s",
-        note="Baseline is slow because ungrounded models generate the most tokens when they know the least.",
+        note=(
+            "Baseline is slow because ungrounded models generate the most tokens "
+            "when they know the least."
+        ),
     )
     write_pair(
         "cost",
         "Estimated cost per 10,000 queries",
-        "From measured tokens/query, at $0.20 / M prompt + $0.60 / M completion (typical hosted 8B pricing).",
+        (
+            "From measured tokens/query, at $0.20 / M prompt + $0.60 / M completion "
+            "(typical hosted 8B pricing)."
+        ),
         [cost_per_10k(row[3], row[4]) for row in DATA],
         lambda v: f"${v:.2f}",
-        note="Token counts are measured; prices are the labeled assumption. Self-hosted, the same ratios apply as GPU time.",
+        note=(
+            "Token counts are measured; prices are the labeled assumption. "
+            "Self-hosted, the same ratios apply as GPU time."
+        ),
     )
 
 
