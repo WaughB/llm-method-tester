@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="280" viewBox="0 0 760 280" role="img" aria-label="Answer quality — blind LLM judge">
+<text x="0" y="18" font-family="-apple-system, 'Segoe UI', Roboto, sans-serif" font-size="15" font-weight="600" fill="#0b0b0b">Answer quality — blind LLM judge</text>
+<text x="0" y="36" font-family="-apple-system, 'Segoe UI', Roboto, sans-serif" font-size="12" fill="#52514e">Mean judge score across all three models (0–5). Gray = no-retrieval control.</text>
+<text x="160" y="75.0" text-anchor="end" font-family="-apple-system, 'Segoe UI', Roboto, sans-serif" font-size="13" fill="#52514e">Baseline (control)</text>
+<rect x="170" y="61.0" width="22.8" height="18" rx="3" fill="#b5b3ac"/>
+<text x="200.8" y="75.0" font-family="-apple-system, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="600" fill="#0b0b0b">0.23</text>
+<text x="160" y="115.0" text-anchor="end" font-family="-apple-system, 'Segoe UI', Roboto, sans-serif" font-size="13" fill="#52514e">Vector RAG</text>
+<rect x="170" y="101.0" width="454.1" height="18" rx="3" fill="#2a78d6"/>
+<text x="632.1" y="115.0" font-family="-apple-system, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="600" fill="#0b0b0b">4.58</text>
+<text x="160" y="155.0" text-anchor="end" font-family="-apple-system, 'Segoe UI', Roboto, sans-serif" font-size="13" fill="#52514e">Obsidian RAG</text>
+<rect x="170" y="141.0" width="452.2" height="18" rx="3" fill="#2a78d6"/>
+<text x="630.2" y="155.0" font-family="-apple-system, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="600" fill="#0b0b0b">4.56</text>
+<text x="160" y="195.0" text-anchor="end" font-family="-apple-system, 'Segoe UI', Roboto, sans-serif" font-size="13" fill="#52514e">PageIndex (reimpl)</text>
+<rect x="170" y="181.0" width="470.0" height="18" rx="3" fill="#2a78d6"/>
+<text x="648.0" y="195.0" font-family="-apple-system, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="600" fill="#0b0b0b">4.74</text>
+<text x="160" y="235.0" text-anchor="end" font-family="-apple-system, 'Segoe UI', Roboto, sans-serif" font-size="13" fill="#52514e">PageIndex (official)</text>
+<rect x="170" y="221.0" width="429.3" height="18" rx="3" fill="#2a78d6"/>
+<text x="607.3" y="235.0" font-family="-apple-system, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="600" fill="#0b0b0b">4.33</text>
+<text x="0" y="272" font-family="-apple-system, 'Segoe UI', Roboto, sans-serif" font-size="11" fill="#898781">Fictional corpus: the control proves retrieval, not memorization, drives every score above it.</text>
+</svg>

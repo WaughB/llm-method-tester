@@ -79,6 +79,24 @@ gold sources present in what the strategy retrieved. Latency = mean seconds per 
 | nemotron-3-nano:4b | **PageIndex (reimpl)** | **4.70** | 77% | 73% | 6.9s | 3 |
 | nemotron-3-nano:4b | PageIndex (official) | 3.37 | 56% | 55% | 6.5s | 2 |
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/charts/judge-score-dark.svg">
+  <img alt="Bar chart: mean blind-judge score per strategy. Baseline control 0.23; Vector RAG 4.58; Obsidian RAG 4.56; PageIndex reimplementation 4.74; PageIndex official 4.33." src="docs/charts/judge-score-light.svg">
+</picture>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/charts/latency-dark.svg">
+  <img alt="Bar chart: mean latency per question. Baseline 30.1s; Vector RAG 2.2s; Obsidian RAG 2.8s; PageIndex reimplementation 16.4s; PageIndex official 15.5s." src="docs/charts/latency-light.svg">
+</picture>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/charts/cost-dark.svg">
+  <img alt="Bar chart: estimated cost per ten thousand queries from measured tokens. Baseline $3.22; Vector RAG $1.58; Obsidian RAG $2.57; PageIndex reimplementation $13.04; PageIndex official $24.41." src="docs/charts/cost-light.svg">
+</picture>
+
+*(Charts are generated from the reference run by
+[docs/charts/generate_charts.py](docs/charts/generate_charts.py).)*
+
 **What the numbers say:**
 
 - **The control worked.** Baselines score 0.2–0.3/5 with 3–4% fact recall — the fictional
